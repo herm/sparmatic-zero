@@ -14,10 +14,13 @@
 #include <avr/interrupt.h>
 
 #include "keys.h"
+#ifdef ENCODER
+#include "encoder.h"
+#endif
 
 #ifndef F_CPU
 #define F_CPU           1000000                   // processor clock frequency
-#error kein F_CPU definiert
+#error F_CPU not defined
 #endif
 
 
@@ -100,11 +103,16 @@ uint8_t get_key_long( uint8_t key_mask )
  */
 int8_t get_key_increment(void)
 {
+	#ifdef ENCODER
+	return encoderRead();
+	#else
 	uint8_t keys = get_key_press((1 << KEY_MINUS) | (1 << KEY_PLUS));
 	if(keys & (1 << KEY_PLUS))
 		return 1;
 	if(keys & (1 << KEY_MINUS))
 		return -1;
+	#endif
+	
 	return 0;
 }
 

@@ -9,7 +9,7 @@
 #include <avr/interrupt.h>
 #include "timer.h"
 
-typedef void (*TimerCallback)(void);
+// typedef void (*TimerCallback)(void);
 
 static volatile uint8_t Seconds;
 static uint8_t Minutes;

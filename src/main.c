@@ -5,22 +5,37 @@
 #include <util/delay.h>
 #include <avr/wdt.h>
 
-#include "bootloader/bootloader.h"
-#include "nRF24L01_ll.h"
-#include "funk.h"
+// avrdude -p m169 -c usbasp -U flash:w:main.hex
+
+#include "config.h"
+
 #include "lcd.h"
 #include "keys.h"
 #include "ntc.h"
 #include "motor.h"
 #include "timer.h"
-#include "nRF24L01.h"
 #include "adc.h"
 #include "control.h"
 #include "programming.h"
 
+
+#ifdef ENCODER
+#include "encoder.h"
+#warning "encoder being included"
+#endif
+
+#ifdef BOOTLOADER
+#include "bootloader/bootloader.h"
+#endif
+
+#ifdef RADIO
+#include "nRF24L01.h"
+#include "nRF24L01_ll.h"
+#include "funk.h"
+#endif
+
 #define ADC_CH_REF 30
 #define ADC_REF_MV 1100
-
 
 #define SLEEP_POWERSAVE ((1 << SM1) | (1 << SM0))
 #define SLEEP SLEEP_POWERSAVE
@@ -70,12 +85,6 @@ static void sysShutdown(void)
 	//lcdOff();
 }
 
-ISR(PCINT1_vect)
-{
-/* used for waking up the device by key press*/
-	LCDCRA |= (1 << LCDIE);
-}
-
 /* occurs at each new LCD frame , ~128 ms*/
 ISR(LCD_vect)
 {
@@ -100,7 +109,12 @@ ISR(LCD_vect)
 #define PCINT0_PORTIN PINE
 ISR(PCINT0_vect)
 {
+	#ifdef RADIO
 	static unsigned char lastState = (1 << IRQ_PIN);	// init to defaults
+	#else
+	static unsigned char lastState = 0;	// init to defaults
+	#endif
+	
 	unsigned char newState = PCINT0_PORTIN;
 	unsigned char changed = newState ^ lastState;
 	lastState = newState;
@@ -109,16 +123,37 @@ ISR(PCINT0_vect)
 	if(newState & (1 << POWERLOSS_PIN))
 		sysShutdown();
 
+	#ifdef RADIO
 	if(~newState & (1 << IRQ_PIN))
 	{
+		
 		nRF24L01_IRQ();
+		
 	}
+	#endif
 
 	/* any other case is motor step */
 	if(changed & (1 << MOTOR_SENSE_PIN))
 	{
 		motorStep();
 	}
+}
+
+
+ISR(PCINT1_vect)
+{
+/* used for waking up the device by key press*/
+	LCDCRA |= (1 << LCDIE);
+	
+	#ifdef ENCODER
+	encoderPeriodicScan();
+	#if 1
+	// int8_t delta = encoderRead();
+	int8_t delta = ((PINB & (1<<PB7)) >> 7) * 10 + (PINB & (1<<PB0));
+	displayNumber(delta, 4);
+	// _delay_ms(100);
+	#endif
+	#endif
 }
 
 
@@ -369,7 +404,11 @@ static void menu(void) {
 	}
 	case MENU_OTA_UPDATE:
 	{
+		#ifdef BOOTLOADER
 		BOOTLOADER_EXECUTE();
+		#else
+		// show message
+		#endif
 	}
 	default:
 		break;
@@ -378,6 +417,8 @@ static void menu(void) {
 
 int main(void)
 {
+
+	
 	uint32_t lastStatusMessageSent = 0;
 	_delay_ms(50);
 	timerInit();
@@ -386,30 +427,39 @@ int main(void)
 	motorInit();
 	lcdInit();
 	keyInit();
+	#ifdef ENCODER
+	encoderInit();
+	#endif
 	ntcInit();
+	#ifdef RADIO
 	funkInit();
+	#endif
 	sei();
 
 	/*if(ventInit())
 	{
-		while(1)	/* we do not want to operate with an incorrect setup
+		while(1)	// we do not want to operate with an incorrect setup
 			sysSleep();
 			;
 	} */
 
 	while(1)
 	{
+		#if 0
 		updateNtcTemperature();
 		updateBattery();
 
 		menu();
 
+		#ifdef RADIO
 		if(lastStatusMessageSent + RF_STATUS_MESSAGES < SystemTime)
 		{
 			funkSend();
 			lastStatusMessageSent = SystemTime;
 		}
+		#endif
 
+		#endif
 		sysSleep();
 	}
 
