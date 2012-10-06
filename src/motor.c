@@ -95,6 +95,10 @@ static int16_t TargetPosition = -1;
  * Motorstrom starke Belastung
  */
 
+
+/// \brief .
+/// 
+/// 
 void motorInit(void)
 {
 	  MOTOR_PORT &= ~((1 << MOTOR_PIN_L) | (1 << MOTOR_PIN_R));
@@ -103,11 +107,19 @@ void motorInit(void)
 	  PCMSK0 |= (1 << PCINT1);
 }
 
+
+/// \brief .
+/// 
+/// 
 static uint16_t getCurrent(void)
 {
 	return getAdc(ADC_CH_MOTOR);
 }
 
+
+/// \brief .
+/// 
+/// 
 void motorStopMove(void)
 {
 	disableTimeout();
@@ -118,12 +130,20 @@ void motorStopMove(void)
 	Direction = DIR_STOP;
 }
 
+
+/// \brief .
+/// 
+/// 
 void motorStopTimeout(void)
 {
 	MotorStopSource |= STOP_TIMEOUT;
 	motorStopMove();
 }
 
+
+/// \brief .
+/// 
+/// 
 static void motorMove(int8_t dir)
 {
 	MOTOR_SENSE_ON;
@@ -133,21 +153,25 @@ static void motorMove(int8_t dir)
 	enableTimeout(motorStopTimeout, 255);	/* first timeout long to allow startup */
 	switch(dir)
 	{
-	case DIR_OPEN:
-		MOTOR_OPEN;
-		break;
-	case DIR_CLOSE:
-		MOTOR_CLOSE;
-		break;
-	default:
-		MOTOR_SENSE_OFF;
-		break;
+		case DIR_OPEN:
+			MOTOR_OPEN;
+			break;
+		case DIR_CLOSE:
+			MOTOR_CLOSE;
+			break;
+		default:
+			MOTOR_SENSE_OFF;
+			break;
 	}
 	Direction = dir;
 	PWM = 0;
 	MOTOR_TIMER_START;
 }
 
+
+/// \brief .
+/// 
+/// 
 /**
  * drives valve position to given value.
  * @param valve valve opening from 0..255
@@ -169,6 +193,10 @@ void motorMoveTo(uint8_t valve)
 
 }
 
+
+/// \brief .
+/// 
+/// 
 /*
  * resets motor calibration and fully opens until block.
  * @return not zero on hardware failure (no other errors possible)
@@ -185,10 +213,14 @@ uint8_t motorFullOpen(void)
 	MotorPosition = MOTOR_POSITION_MAX;
 	if(MotorStopSource & ~(STOP_CURRENT | STOP_TIMEOUT))
 		return 1;	/* current detection and stop detection are okay */
-
+	
 	return 0;
 }
 
+
+/// \brief .
+/// 
+/// 
 /*
  * Closes until detection of touching the vent. close further until fully closed.
  * @return not zero on error
@@ -196,60 +228,72 @@ uint8_t motorFullOpen(void)
 uint8_t motorAdapt(void)
 {
 	uint16_t currentNormal;
-
+	
 	MotorTimeout = MOTOR_SPEED_BLOCK;
 	CurrentLimit = MOTOR_CURRENT_BLOCK;
-
+	
 	motorMove(DIR_CLOSE);
 	/* let vent start moving */
 	while(motorIsRunning() && MotorPosition > MOTOR_POSITION_MAX - 11)
 		;
 	currentNormal = getCurrent();
-
+	
 	if(!motorIsRunning())
 		return 1;
-
-
+	
+	
 	/* wait for a small increase in motor power consumption -> vent touched */
 	while(motorIsRunning() && getCurrent() > (currentNormal - MOTOR_CURRENT_VALVE_DETECT))
 		;
 	PositionValveOpen = MotorPosition;
-
-	if(!motorIsRunning())
+	
+	if(!motorIsRunning())	
 		return 1;
-
+	
 	/* wait for motor turning off -> vent closed*/
 	while(motorIsRunning())
 		;
-
+	
 	PositionValveClosed = MotorPosition;
-
+	
 	/* check for min. vent range, we may have an error in detection */
 	if(PositionValveOpen - PositionValveClosed < MOTOR_VENT_RANGE_MIN)
 		return 1;
-
+	
 	if (MotorStopSource & ~(STOP_CURRENT | STOP_TIMEOUT))
 		return 1;
-
+	
 	return 0;
 }
 
-/**
- * called by interrupt
- */
+
+/// \brief Check and update motor position.
+/// 
+/// called by opto sensor interrupt
+/// 
 uint8_t motorStep(void)
 {
+	// mask sensor pin because pin change interrupt is triggered by all pins on port
 	uint8_t state = MOTOR_SENSE_PORT_IN & (1 << MOTOR_SENSE_PIN);
-	if(((Direction == DIR_OPEN) && state) || ((Direction == DIR_CLOSE) && !state)) {
+	
+	if(((Direction == DIR_OPEN) && state) || ((Direction == DIR_CLOSE) && !state)) 
+	{
 		setTimeout(MotorTimeout);
 		MotorPosition += Direction;
-		if(MotorPosition < 0 || MotorPosition > MOTOR_POSITION_MAX) {
+		
+		// limits
+		if(MotorPosition < 0 || MotorPosition > MOTOR_POSITION_MAX) 
+		{
 			MotorStopSource |= STOP_POSITION;
 			motorStopMove();
 		}
-		if(TargetPosition >= 0
-			&& (   (Direction == DIR_OPEN && MotorPosition >= TargetPosition)
-			    || (Direction == DIR_CLOSE && MotorPosition <= TargetPosition)))
+		
+		// target
+		if(	TargetPosition >= 0
+				&& (   (Direction == DIR_OPEN && MotorPosition >= TargetPosition)
+						|| (Direction == DIR_CLOSE && MotorPosition <= TargetPosition)
+						)
+			)
 		{
 			MotorStopSource |= STOP_TARGET;
 			TargetPosition = -1;
@@ -260,24 +304,37 @@ uint8_t motorStep(void)
 	return 0;
 }
 
+
+/// \brief .
+/// 
+/// 
 uint8_t motorIsRunning(void)
 {
 	return (Direction != DIR_STOP);
 }
 
+
+/// \brief .
+/// 
+/// 
 /**
  * periodic callback as long as the motor is running.
  * used for current limit or stop condition tests.
  */
 void motorTimer(void)
 {
-	if(motorIsRunning()) {
+	if(motorIsRunning()) 
+	{
 		uint16_t current = getCurrent();
-		if(current < CurrentLimit) {
+		if(current < CurrentLimit) 
+		{
 			MotorStopSource |= STOP_CURRENT;
 			motorStopMove();
-		} else {
-			if(PWM == 0) {
+		} 
+		else 
+		{
+			if(PWM == 0) 
+			{
 				switch(Direction)
 					{
 					case DIR_OPEN:
@@ -290,7 +347,9 @@ void motorTimer(void)
 						break;
 					}
 				PWM = 0;
-			} else {
+			} 
+			else 
+			{
 				MOTOR_STOP;
 				++PWM;
 			}

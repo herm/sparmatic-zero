@@ -22,6 +22,10 @@
 extern uint16_t BatteryMV;
 
 
+
+/// \brief .
+/// 
+/// 
 void funkRxDataAvailable(void)
 {
 	uint8_t rxData[32];
@@ -30,6 +34,10 @@ void funkRxDataAvailable(void)
 }
 
 
+
+/// \brief .
+/// 
+/// 
 /**
  * initializes lower level rf protocol, sets high level address.
  * @param ownAddress high level address: 2-255
@@ -42,6 +50,10 @@ void funkInit(void)
 	nRF24L01_set_rx_callback(&funkRxDataAvailable);
 }
 
+
+/// \brief .
+/// 
+/// 
 /*
 void txPacket(uint8_t adr, MESSAGE_TYPE type, uint8_t *data)
 {
@@ -50,6 +62,10 @@ void txPacket(uint8_t adr, MESSAGE_TYPE type, uint8_t *data)
 }
 */
 
+
+/// \brief .
+/// 
+/// 
 void funkSend(void)
 {
 	MSG_FROM_THRM msg;

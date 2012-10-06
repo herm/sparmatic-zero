@@ -37,6 +37,10 @@ volatile uint8_t key_press;                                // key press detect
 volatile uint8_t key_rpt;                                  // key long press and repeat
 
 
+
+/// \brief .
+/// 
+/// 
 void keyPeriodicScan(void)
 {
   static uint8_t ct0, ct1, rpt;
@@ -57,6 +61,10 @@ void keyPeriodicScan(void)
   }
 }
 
+
+/// \brief .
+/// 
+/// 
 ///////////////////////////////////////////////////////////////////
 //
 // check if a key has been pressed. Each pressed key is reported
@@ -71,6 +79,10 @@ uint8_t get_key_press( uint8_t key_mask )
   return key_mask;
 }
 
+
+/// \brief .
+/// 
+/// 
 ///////////////////////////////////////////////////////////////////
 //
 // check if a key has been pressed long enough such that the
@@ -88,6 +100,10 @@ uint8_t get_key_rpt( uint8_t key_mask )
   return key_mask;
 }
 
+
+/// \brief .
+/// 
+/// 
 ///////////////////////////////////////////////////////////////////
 //
 uint8_t get_key_short( uint8_t key_mask )
@@ -96,6 +112,10 @@ uint8_t get_key_short( uint8_t key_mask )
   return get_key_press( ~key_state & key_mask );
 }
 
+
+/// \brief .
+/// 
+/// 
 ///////////////////////////////////////////////////////////////////
 //
 uint8_t get_key_long( uint8_t key_mask )
@@ -103,6 +123,10 @@ uint8_t get_key_long( uint8_t key_mask )
   return get_key_press( get_key_rpt( key_mask ));
 }
 
+
+/// \brief .
+/// 
+/// 
 /*
  * get increment/decrement keys.
  * This may be extended for rotary encoders in future version.
@@ -128,6 +152,10 @@ int8_t get_key_increment(void)
 	return 0;
 }
 
+
+/// \brief .
+/// 
+/// 
 void keyInit(void)
 {
    // Configure debouncing routines

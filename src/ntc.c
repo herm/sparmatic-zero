@@ -54,11 +54,19 @@ int16_t Temperature;
 int16_t NTCOffset = 0;
 
 
+
+/// \brief .
+/// 
+/// 
 void ntcInit(void)
 {
 	NTC_DDR |= (1 << NTC_PIN);
 }
 
+
+/// \brief .
+/// 
+/// 
 static uint16_t getNtcAdc(void)
 {
 	uint16_t ntc;
@@ -69,6 +77,10 @@ static uint16_t getNtcAdc(void)
 }
 
 
+
+/// \brief .
+/// 
+/// 
 /** returns temperature * 100 */
 void updateNtcTemperature(void)
 {

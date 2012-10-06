@@ -21,6 +21,10 @@ volatile int8_t enc_delta;          // -128 ... 127
 static volatile int8_t last;
 
 
+
+/// \brief .
+/// 
+/// 
 void encoderInit( void )
 {
   int8_t new;
@@ -44,6 +48,10 @@ void encoderInit( void )
 }
 
 
+
+/// \brief .
+/// 
+/// 
 void encoderPeriodicScan(void)
 {
   int8_t new, diff;
@@ -61,6 +69,10 @@ void encoderPeriodicScan(void)
 }
 
 
+
+/// \brief .
+/// 
+/// 
 #if ENCODER == 1
 #warning encoder 1
 int8_t encoderRead( void )         // read single step encoders

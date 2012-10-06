@@ -27,11 +27,19 @@ static volatile TIME Time;
 static TimerCallback TimeoutCallback;
 
 
+
+/// \brief .
+/// 
+/// 
 ISR(TIMER0_OVF_vect) 
 {
 	++Timer0H;
 }
 
+
+/// \brief .
+/// 
+/// 
 ISR(TIMER0_COMP_vect) 
 {
 	if(TimeoutCallback) 
@@ -43,6 +51,10 @@ ISR(TIMER0_COMP_vect)
 
 }
 
+
+/// \brief .
+/// 
+/// 
 /* used for waking up the device periodically */
 ISR(TIMER2_OVF_vect)
 {
@@ -73,6 +85,10 @@ ISR(TIMER2_OVF_vect)
 	Time = tTime;
 }
 
+
+/// \brief .
+/// 
+/// 
 void timerInit(void)
 {
 	ASSR |= (1 << AS2);
@@ -88,6 +104,10 @@ void timerInit(void)
 	TIMSK0 = (1 << TOIE0);
 }
 
+
+/// \brief .
+/// 
+/// 
 void enableTimeout(TimerCallback cbk, uint8_t timeout)
 {
 	TimeoutCallback = cbk;
@@ -96,17 +116,29 @@ void enableTimeout(TimerCallback cbk, uint8_t timeout)
 	TIMSK0 |= (1 << OCIE0A);
 }
 
+
+/// \brief .
+/// 
+/// 
 void setTimeout(uint8_t timeout)
 {
 	OCR0A = TCNT0 + timeout;
 }
 
+
+/// \brief .
+/// 
+/// 
 void disableTimeout()
 {
 	TIMSK0 &= ~(1 << OCIE1A);
 	TimeoutCallback = 0;
 }
 
+
+/// \brief .
+/// 
+/// 
 void setTime(uint8_t weekday, uint8_t hour, uint8_t minute)
 {
 	cli();
@@ -116,6 +148,10 @@ void setTime(uint8_t weekday, uint8_t hour, uint8_t minute)
 	sei();
 }
 
+
+/// \brief .
+/// 
+/// 
 TIME getTime(void)
 {
 	TIME res;
