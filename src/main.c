@@ -67,7 +67,15 @@
 uint16_t BatteryMV;
 
 typedef enum {
-	MENU_SELECTOR, MENU_FIRST, MENU_MAIN, MENU_PID, MENU_PROGRAM, MENU_OTA_UPDATE, MENU_VENT, MENU_TEMPERATURE_ADJUST, MENU_LAST
+	MENU_SELECTOR, 
+	MENU_FIRST, 
+	MENU_MAIN, 
+	MENU_PID, 
+	MENU_PROGRAM, 
+	MENU_OTA_UPDATE, 
+	MENU_VENT, 
+	MENU_TEMPERATURE_ADJUST, 
+	MENU_LAST
 } MENU;
 
 const char MenuText[][5] PROGMEM = {"MAIN", ".PID", "PROG", "OTAU", "VENT", "TADJ"};
@@ -252,14 +260,21 @@ static uint8_t inputSelector(const char text[][5], uint8_t min, uint8_t max, uin
 	while (TIMEOUT_OKAY) 
 	{
 		char buf[5];
+		
+		// input
 		int8_t valueChange = get_key_increment();
-		/* exit on OK */
+		
 		if (get_key_press((1 << KEY_OK)))
-			break;
+		{
+			break;	// exit on OK
+		}
 		
 		if (valueChange != 0)
+		{
 			TIMEOUT_RENEW;
+		}
 		
+		// display
 		buf[4] = 0;
 		buf[0] = pgm_read_byte(&(text[value - offset][0]));
 		buf[1] = pgm_read_byte(&(text[value - offset][1]));
@@ -267,6 +282,7 @@ static uint8_t inputSelector(const char text[][5], uint8_t min, uint8_t max, uin
 		buf[3] = pgm_read_byte(&(text[value - offset][3]));
 		displayString(buf);
 		
+		// wrap-around
 		value += valueChange;
 		if (value > max)
 			value -= max - min + 1;
@@ -286,8 +302,9 @@ static void menu(void)
 {
 	static MENU currentMenu = MENU_MAIN;
 	static uint8_t menuData = 0; /* number of screen in menu */
-	uint8_t valueChange;
+	int8_t valueChange;
 	
+	// enter menu
 	if(get_key_long(1 << KEY_MENU)) 
 	{
 		displaySymbols(0, LCD_BAG | LCD_DP | LCD_HOURS | LCD_INHOUSE | LCD_LOCK | LCD_MOON | LCD_OUTHOUSE | LCD_STAR);
@@ -309,35 +326,43 @@ static void menu(void)
 			break;
 		}
 		
+		// this is the default state, not selected in the menu
 		case MENU_MAIN: 
 		{
+			// show actual temperature unless setpoint is being adjusted
 			if (menuData == 0)
+			{
 				displayNumber(getNtcTemperature(), 4);
+			}
 			else if (menuData == 1)
+			{
 				displayNumber(getNominalTemperature(), 4);
-			
+			}
 			displaySymbols(LCD_DP, LCD_DP);
 			
+			// adjust setpoint
 			valueChange = get_key_increment();
 			if (valueChange != 0) 
 			{
-				setNominalTemperature(
-						getNominalTemperature()
-								+ valueChange * MANUAL_TEMPERATURE_STEP);
+				setNominalTemperature( getNominalTemperature() + valueChange * MANUAL_TEMPERATURE_STEP);
 				menuData = 1; /* display this */
 			}
 			
+			// disable program for X hours
 			if (get_key_press(1 << KEY_CLOCK)) 
-			{ /* disable program for X hours */
+			{ 
 				int16_t hours;
 				displayAsciiDigit('H', 3); /* suffix: hour */
 				hours = inputNumber(0, 995, 5, 5, 3);
 				dismissProgramChanges(hours * 6);
 			}
+			
+			// return ??
 			if(get_key_press(1 << KEY_OK)) 
 			{
 				menuData = 1 - menuData;
 			}
+			
 			break;
 		}
 		
