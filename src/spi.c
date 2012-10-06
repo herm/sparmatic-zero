@@ -1,3 +1,8 @@
+/// \file spi.c
+/// 
+/// 
+/// 
+
 /*
  Copyright (c) 2007 Stefan Engelke <mbox@stefanengelke.de>
 

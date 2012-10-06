@@ -1,3 +1,8 @@
+/// \file timer.h
+/// 
+/// 
+/// 
+
 /*
  * timer.h
  *

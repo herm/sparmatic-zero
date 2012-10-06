@@ -111,7 +111,7 @@ CFLAGS += $(patsubst %,-I%,$(EXTRAINCDIRS))
 CFLAGS += $(CSTANDARD)
 CFLAGS += -DF_OSC=$(F_OSC)
 CFLAGS += -DF_CPU=$(F_OSC)
-
+CFLAGS += -fno-inline-small-functions
 
 
 # Assembler flags.

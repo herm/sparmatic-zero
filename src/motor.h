@@ -1,3 +1,8 @@
+/// \file motor.h
+/// 
+/// 
+/// 
+
 /*
  * motor.h
  *

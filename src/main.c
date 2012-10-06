@@ -1,3 +1,8 @@
+/// \file main.c
+/// 
+/// 
+/// 
+
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <avr/sleep.h>
@@ -98,7 +103,7 @@ ISR(LCD_vect)
 		cnt = 0;
 	else
 		cnt ++;
-
+	
 	if(cnt > 4 && !motorRunning)
 	{	/* TODO this simple check may lead to missed keys when they are pressed in the moment the motor is stopped */
 		cnt = 0;
@@ -118,20 +123,20 @@ ISR(PCINT0_vect)
 	unsigned char newState = PCINT0_PORTIN;
 	unsigned char changed = newState ^ lastState;
 	lastState = newState;
-
+	
 	/* emergency wakeup on power loss, motor step counter */
 	if(newState & (1 << POWERLOSS_PIN))
+	{
 		sysShutdown();
-
+	}
+	
 	#ifdef RADIO
 	if(~newState & (1 << IRQ_PIN))
 	{
-		
 		nRF24L01_IRQ();
-		
 	}
 	#endif
-
+	
 	/* any other case is motor step */
 	if(changed & (1 << MOTOR_SENSE_PIN))
 	{
@@ -147,12 +152,6 @@ ISR(PCINT1_vect)
 	
 	#ifdef ENCODER
 	encoderPeriodicScan();
-	#if 1
-	// int8_t delta = encoderRead();
-	int8_t delta = ((PINB & (1<<PB7)) >> 7) * 10 + (PINB & (1<<PB0));
-	displayNumber(delta, 4);
-	// _delay_ms(100);
-	#endif
 	#endif
 }
 
@@ -186,7 +185,8 @@ void ioInit(void)
  * returns 1 on error */
 static uint8_t ventInit(void)
 {
-	if(motorFullOpen()) {
+	if(motorFullOpen()) 
+	{
 		displayString("EI1");
 		return 1;
 	}
@@ -194,7 +194,8 @@ static uint8_t ventInit(void)
 	while(!get_key_press(1 << KEY_OK))
 		;
 	displayString("ADAP");
-	if(motorAdapt()) {
+	if(motorAdapt()) 
+	{
 		displayString("EI2");
 		return 1;
 	}
@@ -243,182 +244,217 @@ static int16_t inputNumber(int16_t min, int16_t max, int16_t init, int16_t step,
  * @param init: start value
  * @param offset: array-Index = value - offset (signed)
  */
-static uint8_t inputSelector(const char text[][5], uint8_t min, uint8_t max, uint8_t init, int8_t offset) {
+static uint8_t inputSelector(const char text[][5], uint8_t min, uint8_t max, uint8_t init, int8_t offset) 
+{
 	TIMEOUT_INIT;
 	int16_t value = init;
-	while (TIMEOUT_OKAY) {
+	
+	while (TIMEOUT_OKAY) 
+	{
 		char buf[5];
 		int8_t valueChange = get_key_increment();
 		/* exit on OK */
 		if (get_key_press((1 << KEY_OK)))
 			break;
-
+		
 		if (valueChange != 0)
 			TIMEOUT_RENEW;
-
+		
 		buf[4] = 0;
 		buf[0] = pgm_read_byte(&(text[value - offset][0]));
 		buf[1] = pgm_read_byte(&(text[value - offset][1]));
 		buf[2] = pgm_read_byte(&(text[value - offset][2]));
 		buf[3] = pgm_read_byte(&(text[value - offset][3]));
 		displayString(buf);
+		
 		value += valueChange;
 		if (value > max)
 			value -= max - min + 1;
 		else if (value < min)
 			value += max - min + 1;
 	}
-
+	
 	return value;
 }
 
-static void menu(void) {
+
+
+/// \brief .
+/// 
+/// 
+static void menu(void) 
+{
 	static MENU currentMenu = MENU_MAIN;
 	static uint8_t menuData = 0; /* number of screen in menu */
-
 	uint8_t valueChange;
-	if(get_key_long(1 << KEY_MENU)) {
+	
+	if(get_key_long(1 << KEY_MENU)) 
+	{
 		displaySymbols(0, LCD_BAG | LCD_DP | LCD_HOURS | LCD_INHOUSE | LCD_LOCK | LCD_MOON | LCD_OUTHOUSE | LCD_STAR);
 		menuData = currentMenu;
 		currentMenu = MENU_SELECTOR;
 	}
-	switch (currentMenu) {
-	case MENU_SELECTOR: {
-		uint8_t nextMenu = menuData;
-
-		nextMenu = inputSelector(MenuText, MENU_FIRST + 1, MENU_LAST - 1,
-				nextMenu, MENU_FIRST + 1);
-		menuData = 0;
-		currentMenu = nextMenu;
-		break;
-	}
-	case MENU_MAIN: {
-		if (menuData == 0)
-			displayNumber(getNtcTemperature(), 4);
-		else if (menuData == 1)
-			displayNumber(getNominalTemperature(), 4);
-
-		displaySymbols(LCD_DP, LCD_DP);
-
-		valueChange = get_key_increment();
-		if (valueChange != 0) {
-			setNominalTemperature(
-					getNominalTemperature()
-							+ valueChange * MANUAL_TEMPERATURE_STEP);
-			menuData = 1; /* display this */
-		}
-
-		if (get_key_press(1 << KEY_CLOCK)) { /* disable program for X hours */
-			int16_t hours;
-			displayAsciiDigit('H', 3); /* suffix: hour */
-			hours = inputNumber(0, 995, 5, 5, 3);
-			dismissProgramChanges(hours * 6);
-		}
-		if(get_key_press(1 << KEY_OK)) {
-			menuData = 1 - menuData;
-		}
-		break;
-	}
-	case MENU_PID:
+	
+	switch (currentMenu) 
 	{
-		int16_t value;
-		if(get_key_short(1 << KEY_MENU)) {
-			menuData = inputSelector(PIDText, 0, sizeof(PIDText) / sizeof(PIDText[0]), menuData, 0);
-		}
-		switch (menuData) {
-		case 0:
-			value = controller.k_p;
-			break;
-		case 1:
-			value = controller.k_d;
-			break;
-		case 2:
-			value = controller.k_i;
-			break;
-		case 3:
-			value = controller.i_val / 100;
-			break;
-		case 4:
-			value = controller.i_max / 10;
-			break;
-		case 5:
-			value = controller.e_last;
-			break;
-		default:
-			value = -999;
-		}
-		displayNumber(value, 4);
-		if (get_key_increment()) {
-			value = inputNumber(-999, 9999, value, 1, 4);
-			switch (menuData) {
-			case 0:
-				controller.k_p = value;
-				break;
-			case 1:
-				controller.k_d = value;
-				break;
-			case 2:
-				controller.k_i = value;
-				break;
-			case 3:
-				controller.i_val = value * 100;
-				break;
-			case 4:
-				controller.i_max = value * 10;
-				break;
-			case 5:
-				controller.e_last = value;
-				break;
-			}
-		}
-		break;
-	}
-	case MENU_VENT:
-	{
-		int16_t value;
-		if(get_key_increment()) {
-			menuData = inputNumber(0, 2, menuData, 1, 4);
-		}
-		switch(menuData)
+		case MENU_SELECTOR: 
 		{
-		case 0:
-			value = MotorPosition;
+			uint8_t nextMenu = menuData;
+			
+			nextMenu = inputSelector(	MenuText, MENU_FIRST + 1, 
+																MENU_LAST - 1,
+																nextMenu, MENU_FIRST + 1);
+			menuData = 0;
+			currentMenu = nextMenu;
 			break;
-		case 1:
-			value = PositionValveOpen;
-			break;
-		case 2:
-			value = PositionValveClosed;
-			break;
-		default:
-			value = -999;
 		}
-		displayNumber(value, 4);
-		break;
-	}
-	case MENU_TEMPERATURE_ADJUST:
-	{
-		displaySymbols(LCD_DP, LCD_DP);
-		NTCOffset = inputNumber(-1000, 1000, NTCOffset, 10, 4);
-		break;
-	}
-	case MENU_OTA_UPDATE:
-	{
-		#ifdef BOOTLOADER
-		BOOTLOADER_EXECUTE();
-		#else
-		// show message
-		#endif
-	}
-	default:
-		break;
+		
+		case MENU_MAIN: 
+		{
+			if (menuData == 0)
+				displayNumber(getNtcTemperature(), 4);
+			else if (menuData == 1)
+				displayNumber(getNominalTemperature(), 4);
+			
+			displaySymbols(LCD_DP, LCD_DP);
+			
+			valueChange = get_key_increment();
+			if (valueChange != 0) 
+			{
+				setNominalTemperature(
+						getNominalTemperature()
+								+ valueChange * MANUAL_TEMPERATURE_STEP);
+				menuData = 1; /* display this */
+			}
+			
+			if (get_key_press(1 << KEY_CLOCK)) 
+			{ /* disable program for X hours */
+				int16_t hours;
+				displayAsciiDigit('H', 3); /* suffix: hour */
+				hours = inputNumber(0, 995, 5, 5, 3);
+				dismissProgramChanges(hours * 6);
+			}
+			if(get_key_press(1 << KEY_OK)) 
+			{
+				menuData = 1 - menuData;
+			}
+			break;
+		}
+		
+		case MENU_PID:
+		{
+			int16_t value;
+			if(get_key_short(1 << KEY_MENU)) 
+			{
+				menuData = inputSelector(PIDText, 0, sizeof(PIDText) / sizeof(PIDText[0]), menuData, 0);
+			}
+			
+			switch (menuData) 
+			{
+				case 0:
+					value = controller.k_p;
+					break;
+				case 1:
+					value = controller.k_d;
+					break;
+				case 2:
+					value = controller.k_i;
+					break;
+				case 3:
+					value = controller.i_val / 100;
+					break;
+				case 4:
+					value = controller.i_max / 10;
+					break;
+				case 5:
+					value = controller.e_last;
+					break;
+				default:
+					value = -999;
+			}
+			displayNumber(value, 4);
+			
+			if (get_key_increment()) 
+			{
+				value = inputNumber(-999, 9999, value, 1, 4);
+				switch (menuData) 
+				{
+					case 0:
+						controller.k_p = value;
+						break;
+					case 1:
+						controller.k_d = value;
+						break;
+					case 2:
+						controller.k_i = value;
+						break;
+					case 3:
+						controller.i_val = value * 100;
+						break;
+					case 4:
+						controller.i_max = value * 10;
+						break;
+					case 5:
+						controller.e_last = value;
+						break;
+				}
+			}
+			break;
+		}
+		
+		case MENU_VENT:
+		{
+			int16_t value;
+			if(get_key_increment()) 
+			{
+				menuData = inputNumber(0, 2, menuData, 1, 4);
+			}
+			switch(menuData)
+			{
+				case 0:
+					value = MotorPosition;
+					break;
+				case 1:
+					value = PositionValveOpen;
+					break;
+				case 2:
+					value = PositionValveClosed;
+					break;
+				default:
+					value = -999;
+			}
+			displayNumber(value, 4);
+			break;
+		}
+		
+		case MENU_TEMPERATURE_ADJUST:
+		{
+			displaySymbols(LCD_DP, LCD_DP);
+			NTCOffset = inputNumber(-1000, 1000, NTCOffset, 10, 4);
+			break;
+		}
+		
+		case MENU_OTA_UPDATE:
+		{
+			#ifdef BOOTLOADER
+			BOOTLOADER_EXECUTE();
+			#else
+			// show message
+			#endif
+		}
+		
+		default:
+		{
+			break;
+		}
 	}
 }
 
+/// \brief .
+/// 
+/// 
 int main(void)
 {
-
-	
 	uint32_t lastStatusMessageSent = 0;
 	_delay_ms(50);
 	timerInit();
@@ -445,7 +481,17 @@ int main(void)
 
 	while(1)
 	{
-		#if 0
+		#ifdef ENCODERTEST
+		#define DISPLAYDEBUG
+		static int8_t delta = 0;
+		// delta += encoderRead();	// this will show the value ("---1" or "   1") and a blank screen (0="    ") alternating
+		delta += get_key_increment();	// this will show the value ("---1" or "   1") and a blank screen (0="    ") alternating
+		// int8_t delta = ((PINB & (1<<PB7)) >> 7) * 10 + (PINB & (1<<PB0));	// show the state
+		displayNumber(delta, 4);
+		// _delay_ms(100);
+		#endif
+	
+		#ifndef DISPLAYDEBUG
 		updateNtcTemperature();
 		updateBattery();
 
@@ -458,7 +504,7 @@ int main(void)
 			lastStatusMessageSent = SystemTime;
 		}
 		#endif
-
+		
 		#endif
 		sysSleep();
 	}

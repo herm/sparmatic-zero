@@ -2,10 +2,9 @@
 // 
 // Mechanical rotary encoder in Eurotronic Sparmatic Comet / Aldi Thermy 2011
 // 
-// 
-// + xx | -> 10 -> 11 | -> 01 -> 00 | -> 10 -> 11
-// - 11 | -> 10 -> 00 | ...
-
+// The encoder has detents on states 00 and 11 (PB7 PB0)
+// Reading direction +: left to right, -: right to left
+//                .. 00 10 11 01 ..
 // 
 // Credits:
 //  Reading rotary encoder  / one, two and four step encoders supported / Author: Peter Dannegger
@@ -17,14 +16,22 @@
 
 #include "config.h"
 #include "encoder.h"
- 
+
 volatile int8_t enc_delta;          // -128 ... 127
-static int8_t last;
- 
- 
+static volatile int8_t last;
+
+
 void encoderInit( void )
 {
   int8_t new;
+	
+	
+	ENCODER_DDR &= ~ENCODER_ALL;                // configure key port for input
+  ENCODER_PORT |= ENCODER_ALL;                // and turn on internal pull-up resistors
+
+	// wake up from sleep (and scan) in interrupt
+	EIMSK |= (1 << PCIE1);	//PC-INT 8..15
+	PCMSK1 |= ENCODER_ALL; // Enable all switches PC-INT
  
   new = 0;
   if( PHASE_A )
@@ -33,18 +40,10 @@ void encoderInit( void )
     new ^= 1;                   // convert gray to binary
   last = new;                   // power on state
   enc_delta = 0;
-	
-	
-	ENCODER_DDR &= ~ENCODER_ALL;                // configure key port for input
-  ENCODER_PORT |= ENCODER_ALL;                // and turn on pull up resistors
-
-	// scan in interrupt and wake up from sleep
-	EIMSK |= (1 << PCIE1);	//PC-INT 8..15
-	PCMSK1 |= (1<<ENCODER_A) | (1<<ENCODER_B) ; // Enable all switches PC-INT
 
 }
- 
- 
+
+
 void encoderPeriodicScan(void)
 {
   int8_t new, diff;
@@ -60,7 +59,8 @@ void encoderPeriodicScan(void)
     enc_delta += (diff & 2) - 1;        // bit 1 = direction (+/-)
   }
 }
- 
+
+
 #if ENCODER == 1
 #warning encoder 1
 int8_t encoderRead( void )         // read single step encoders
@@ -74,7 +74,7 @@ int8_t encoderRead( void )         // read single step encoders
   return val;                   // counts since last call
 }
 #endif
- 
+
 #if ENCODER == 2 
 #warning encoder 2
 int8_t encoderRead( void )         // read two step encoders
@@ -88,7 +88,7 @@ int8_t encoderRead( void )         // read two step encoders
   return val >> 1;
 }
 #endif
- 
+
 #if ENCODER == 4
 #warning encoder 4
 int8_t encoderRead( void )         // read four step encoders
@@ -102,5 +102,3 @@ int8_t encoderRead( void )         // read four step encoders
   return val >> 2;
 }
 #endif
- 
- 

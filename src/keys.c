@@ -1,3 +1,8 @@
+/// \file keys.c
+/// 
+/// 
+/// 
+
 /************************************************************************/
 /*                                                                      */
 /*                      Debouncing 8 Keys                               */
@@ -13,10 +18,11 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 
-#include "keys.h"
+#include "config.h"
 #ifdef ENCODER
 #include "encoder.h"
 #endif
+#include "keys.h"
 
 #ifndef F_CPU
 #define F_CPU           1000000                   // processor clock frequency
@@ -104,7 +110,13 @@ uint8_t get_key_long( uint8_t key_mask )
 int8_t get_key_increment(void)
 {
 	#ifdef ENCODER
-	return encoderRead();
+	#warning encoder gets key increment
+	int8_t keys = encoderRead();
+	// limit
+	if (keys > 0)
+		return 1;
+	if (keys < 0)
+		return -1;
 	#else
 	uint8_t keys = get_key_press((1 << KEY_MINUS) | (1 << KEY_PLUS));
 	if(keys & (1 << KEY_PLUS))

@@ -1,3 +1,8 @@
+/// \file control.c
+/// 
+/// 
+/// 
+
 /*
  * control.c
  *

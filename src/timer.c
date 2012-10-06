@@ -1,3 +1,7 @@
+/// \file timer.c
+/// 
+/// 
+/// 
 /*
  * timer.c
  *
@@ -22,12 +26,16 @@ static volatile TIME Time;
 
 static TimerCallback TimeoutCallback;
 
-ISR(TIMER0_OVF_vect) {
+
+ISR(TIMER0_OVF_vect) 
+{
 	++Timer0H;
 }
 
-ISR(TIMER0_COMP_vect) {
-	if(TimeoutCallback) {
+ISR(TIMER0_COMP_vect) 
+{
+	if(TimeoutCallback) 
+	{
 		TimeoutCallback();
 		TimeoutCallback = 0;
 		TIMSK0 &= ~(1 << OCIE0A);
@@ -42,16 +50,20 @@ ISR(TIMER2_OVF_vect)
 
 	tTime.second += 8;
 	SystemTime += 8;
-	if(tTime.second > 59) {
+	if(tTime.second > 59) 
+	{
 		tTime.second -= 60;
 		tTime.minute += 1;
-		if(tTime.minute > 59) {
+		if(tTime.minute > 59) 
+		{
 			tTime.minute = 0;
 			tTime.hour += 1;
-			if(tTime.hour > 23) {
+			if(tTime.hour > 23) 
+			{
 				tTime.hour = 0;
 				tTime.weekday += 1;
-				if(tTime.weekday > 6) {
+				if(tTime.weekday > 6) 
+				{
 					tTime.weekday = 0;
 				}
 			}

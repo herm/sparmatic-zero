@@ -1,3 +1,8 @@
+/// \file control.h
+/// 
+/// 
+/// 
+
 /*
  * control.h
  *
