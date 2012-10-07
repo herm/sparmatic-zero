@@ -1,18 +1,18 @@
-/// \file funk.h
+/// \file radio.h
 /// 
 /// 
 /// 
 
 
 /*
- * funk.h
+ * radio.h
  *
  *  Created on: 17.11.2011
  *      Author: matthias
  */
 
-#ifndef FUNK_H_
-#define FUNK_H_
+#ifndef RADIO_H_
+#define RADIO_H_
 
 /* Maybe only the 3 LSB are used */
 static const uint8_t ThermostatAdr[] = {0xA7, 0x5A, 0xCD, 0x14, 0x15};
@@ -67,7 +67,7 @@ typedef struct {
 
 
 
-void funkInit(void);
-void funkSend(void);
+void radioInit(void);
+void radioSend(void);
 
 #endif /* FUNK_H_ */

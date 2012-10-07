@@ -21,7 +21,7 @@ void setNominalTemperature(int16_t temperature);
 
 /**
  * all controller parameters will be scaled by 256.
- * this allows a full vent open/close just by I part.
+ * this allows a full valve open/close just by I part.
  * -> p = 1 will give 1 at output for e = 2.56 degrees
  */
 typedef struct {

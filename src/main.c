@@ -36,7 +36,7 @@
 #ifdef RADIO
 #include "nRF24L01.h"
 #include "nRF24L01_ll.h"
-#include "funk.h"
+#include "radio.h"
 #endif
 
 
@@ -60,19 +60,65 @@ static void updateBattery(void)
 
 
 
-/// \brief .
+/// \brief Disable hardware and save data to non-volatile memory on battery removal.
 /// 
 /// 
 static void sysShutdown(void)
 {
-	//lcdOff();
+		// Lcd_Symbol(BAT, 1 );	// TESTING (barely visible)
+		
+		// ADC
+		ADCSRA = 0;
+		
+		// A, C, D, G: LCD
+		 DDRB = 0;
+		PORTB = 0;
+		
+		 DDRE = 0;
+		PORTE = 0;
+		
+		 DDRF = 0;
+		PORTF = 0;
+		
+		//lcdOff();
+		
+		// Disable LCD
+		// Wait until a new frame is started.
+		while ( !(LCDCRA & (1<<LCDIF)) );
+		// Set LCD Blanking and clear interrupt flag
+		// by writing a logical one to the flag.
+		LCDCRA = (1<<LCDEN)|(1<<LCDIF)|(1<<LCDBL);
+		// Wait until LCD Blanking is effective.
+		while ( !(LCDCRA & (1<<LCDIF)) );
+		// Disable LCD
+		LCDCRA = (0<<LCDEN);
+		
+		// shut down everything else
+		PRR = (1<<PRLCD) | (1<<PRTIM1) | (1<<PRSPI) | (1<<PRUSART0) | (1<<PRADC);
+		
+		 DDRA = 0;
+		PORTA = 0;
+		
+		 DDRC = 0;
+		PORTC = 0;
+		
+		 DDRD = 0;
+		PORTD = 0;
+		
+		 DDRG = 0;
+		PORTG = 0;
+		
+		
+		// write data to EEPROM
+		// time
+		// temperature set-point
+		// other settings should be saved when edited
 }
 
 
-/// \brief .
+/// \brief Occurs at each new LCD frame , ~128 ms.
 /// 
 /// 
-/* occurs at each new LCD frame , ~128 ms*/
 ISR(LCD_vect)
 {
 	static uint8_t cnt = 0;
@@ -97,9 +143,9 @@ ISR(LCD_vect)
 }
 
 
-/// \brief .
+/// \brief Emergency wakeup on power loss, motor step counter, SPI IRQ.
 /// 
-/// 
+/// Triggers on both edges, so state change needs to be tracked in software.
 #define PCINT0_PORTIN PINE
 ISR(PCINT0_vect)
 {
@@ -113,24 +159,25 @@ ISR(PCINT0_vect)
 	unsigned char changed = newState ^ lastState;
 	lastState = newState;
 	
-	/* emergency wakeup on power loss, motor step counter */
+	// save data when battery removed
 	if(newState & (1 << POWERLOSS_PIN))
 	{
 		sysShutdown();
 	}
 	
+	// motor step
+	if(changed & (1 << MOTOR_SENSE_PIN))
+	{
+		motorStep();
+	}
+	
 	#ifdef RADIO
+	// radio IRQ
 	if(~newState & (1 << IRQ_PIN))
 	{
 		nRF24L01_IRQ();
 	}
 	#endif
-	
-	/* any other case is motor step */
-	if(changed & (1 << MOTOR_SENSE_PIN))
-	{
-		motorStep();
-	}
 }
 
 
@@ -191,7 +238,7 @@ void ioInit(void)
 /// \brief Valve initialisation UI.
 /// 
 /// returns 1 on error
-static uint8_t ventInit(void)
+static uint8_t valveInit(void)
 {
 	// open valve (retract actuator)
 	if( motorFullOpen() )
@@ -240,7 +287,7 @@ int main(void)
 	sei();
 	
 	#if 1
-	if(ventInit())
+	if(valveInit())
 	{
 		while(1)	// we do not want to operate with an incorrect setup
 			sysSleep();
@@ -268,7 +315,7 @@ int main(void)
 		#ifdef RADIO
 		if(lastStatusMessageSent + RF_STATUS_MESSAGES < SystemTime)
 		{
-			funkSend();
+			radioSend();
 			lastStatusMessageSent = SystemTime;
 		}
 		#endif

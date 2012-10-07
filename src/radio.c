@@ -9,7 +9,7 @@
 
 #include <stdint.h>
 #include "nRF24L01.h"
-#include "funk.h"
+#include "radio.h"
 #include "ntc.h"
 #include "timer.h"
 #include "lcd.h"
@@ -26,7 +26,7 @@ extern uint16_t BatteryMV;
 /// \brief .
 /// 
 /// 
-void funkRxDataAvailable(void)
+void radioRxDataAvailable(void)
 {
 	uint8_t rxData[32];
 	uint8_t readLen;
@@ -42,12 +42,12 @@ void funkRxDataAvailable(void)
  * initializes lower level rf protocol, sets high level address.
  * @param ownAddress high level address: 2-255
  */
-void funkInit(void)
+void radioInit(void)
 {
 	nRF24L01_init();
 	nRF24L01_set_RADDR_01(0, ThermostatAdr);
 	nRF24L01_set_TADDR(ThermostatAdr);
-	nRF24L01_set_rx_callback(&funkRxDataAvailable);
+	nRF24L01_set_rx_callback(&radioRxDataAvailable);
 }
 
 
@@ -66,7 +66,7 @@ void txPacket(uint8_t adr, MESSAGE_TYPE type, uint8_t *data)
 /// \brief .
 /// 
 /// 
-void funkSend(void)
+void radioSend(void)
 {
 	MSG_FROM_THRM msg;
 	TIME time = getTime();

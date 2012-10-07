@@ -159,7 +159,7 @@ void menu(void)
 		// this is the default state, not selected in the menu
 		case MENU_MAIN: 
 		{
-			// show actual temperature unless setpoint is being adjusted
+			// show current temperature unless setpoint is being adjusted
 			if (menuData == 0)
 			{
 				displayNumber(getNtcTemperature(), 4);
