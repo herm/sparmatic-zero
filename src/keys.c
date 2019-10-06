@@ -86,7 +86,9 @@ uint8_t get_key_rpt(uint8_t key_mask)
 uint8_t get_key_short(uint8_t key_mask)
 {
     cli(); // read key state and key press atomic !
-    return get_key_press(~key_state & key_mask);
+    uint8_t tmp = get_key_press(~key_state & key_mask);
+    sei();
+    return tmp;
 }
 
 
