@@ -41,7 +41,6 @@
 #define MOTOR_TARGET_STOP_EARLY 6
 #define MOTOR_TARGET_HYSTERESIS 10
 
-
 #define ENCODER	2
 // #define ENCODERTEST
 

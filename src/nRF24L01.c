@@ -1,28 +1,26 @@
 /*
-    Copyright (c) 2007 Stefan Engelke <mbox@stefanengelke.de>
+ Copyright (c) 2007 Stefan Engelke <mbox@stefanengelke.de>
 
-    Permission is hereby granted, free of charge, to any person 
-    obtaining a copy of this software and associated documentation 
-    files (the "Software"), to deal in the Software without 
-    restriction, including without limitation the rights to use, copy, 
-    modify, merge, publish, distribute, sublicense, and/or sell copies 
-    of the Software, and to permit persons to whom the Software is 
-    furnished to do so, subject to the following conditions:
+ Permission is hereby granted, free of charge, to any person
+ obtaining a copy of this software and associated documentation
+ files (the "Software"), to deal in the Software without
+ restriction, including without limitation the rights to use, copy,
+ modify, merge, publish, distribute, sublicense, and/or sell copies
+ of the Software, and to permit persons to whom the Software is
+ furnished to do so, subject to the following conditions:
 
-    The above copyright notice and this permission notice shall be 
-    included in all copies or substantial portions of the Software.
+ The above copyright notice and this permission notice shall be
+ included in all copies or substantial portions of the Software.
 
-    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, 
-    EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF 
-    MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND 
-    NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT 
-    HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, 
-    WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, 
-    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
-    DEALINGS IN THE SOFTWARE.
-
-    $Id$
-*/
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+ MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+ HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+ WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+ DEALINGS IN THE SOFTWARE.
+ */
 
 #include <stdint.h>
 #include <util/delay.h>
@@ -53,13 +51,16 @@ static void (*rxCallback)(void);
  */
 static uint8_t nRF24L01_command(uint8_t cmd, const uint8_t *data, uint8_t len)
 {
-	uint8_t sreg;
-	SPI_MSTR;
-	mirf_CSN_lo;
-	sreg = spi_rw1(cmd);
-	spi_w(data, len);
-	mirf_CSN_hi;
-	return sreg;
+    uint8_t sreg;
+    SPI_MSTR
+    ;
+    mirf_CSN_lo
+    ;
+    sreg = spi_rw1(cmd);
+    spi_w(data, len);
+    mirf_CSN_hi
+    ;
+    return sreg;
 }
 /**
  *@param cmd command
@@ -67,50 +68,52 @@ static uint8_t nRF24L01_command(uint8_t cmd, const uint8_t *data, uint8_t len)
  */
 static uint8_t nRF24L01_commandR(uint8_t cmd, uint8_t *data, uint8_t len)
 {
-	uint8_t sreg;
-	SPI_MSTR;
-	mirf_CSN_lo;
-	sreg = spi_rw1(cmd);
-	spi_rw(data, len);
-	mirf_CSN_hi;
-	return sreg;
+    uint8_t sreg;
+    SPI_MSTR
+    ;
+    mirf_CSN_lo
+    ;
+    sreg = spi_rw1(cmd);
+    spi_rw(data, len);
+    mirf_CSN_hi
+    ;
+    return sreg;
 }
 
 static uint8_t nRF24L01_read_register(uint8_t reg)
 // Reads an array of bytes from the given start position in the MiRF registers.
 {
-	uint8_t value;
-	nRF24L01_commandR(R_REGISTER | (REGISTER_MASK & reg), &value, 1);
-	return value;
+    uint8_t value;
+    nRF24L01_commandR(R_REGISTER | (REGISTER_MASK & reg), &value, 1);
+    return value;
 }
 
 static void nRF24L01_write_register(uint8_t reg, uint8_t value)
 {
-	nRF24L01_command(W_REGISTER | (REGISTER_MASK & reg), &value, 1);
+    nRF24L01_command(W_REGISTER | (REGISTER_MASK & reg), &value, 1);
 }
 
 static void nRF24L01_write_register_long(uint8_t reg, const uint8_t *data, uint8_t len)
 {
-	nRF24L01_command(W_REGISTER | (REGISTER_MASK & reg), data, len);
+    nRF24L01_command(W_REGISTER | (REGISTER_MASK & reg), data, len);
 }
-
 
 static void nRF24L01_config(void)
 // Sets the important registers in the MiRF module
 {
     // Set RF channel
-	nRF24L01_write_register(CONFIG, 0);
-	nRF24L01_write_register(RF_CH, DEF_RF_CH);
-	nRF24L01_write_register(RF_SETUP, DEF_RF_SETUP);
-	nRF24L01_write_register(SETUP_AW, (ADDRESS_WIDTH - 2));
-	nRF24L01_write_register(SETUP_RETR, DEF_SETUP_RETR);
-	nRF24L01_write_register(FEATURE, DEF_FEATURE);
-	nRF24L01_write_register(DYNPD, DEF_DYNPD);
-	nRF24L01_write_register(EN_RXADDR, 1);	/* disable all rx pipes except first one*/
-	//nRF24L01_write_register(EN_AA, (1 << ENAA_P0));	/* default: all ENAA set*/
-	nRF24L01_command(FLUSH_RX, 0, 0);
-	nRF24L01_command(FLUSH_TX, 0, 0);
-	nRF24L01_write_register(STATUS, (1 << RX_DR | (1 << TX_DS) | (1 << MAX_RT)));
+    nRF24L01_write_register(CONFIG, 0);
+    nRF24L01_write_register(RF_CH, DEF_RF_CH);
+    nRF24L01_write_register(RF_SETUP, DEF_RF_SETUP);
+    nRF24L01_write_register(SETUP_AW, (ADDRESS_WIDTH - 2));
+    nRF24L01_write_register(SETUP_RETR, DEF_SETUP_RETR);
+    nRF24L01_write_register(FEATURE, DEF_FEATURE);
+    nRF24L01_write_register(DYNPD, DEF_DYNPD);
+    nRF24L01_write_register(EN_RXADDR, 1); /* disable all rx pipes except first one*/
+    //nRF24L01_write_register(EN_AA, (1 << ENAA_P0));	/* default: all ENAA set*/
+    nRF24L01_command(FLUSH_RX, 0, 0);
+    nRF24L01_command(FLUSH_TX, 0, 0);
+    nRF24L01_write_register(STATUS, (1 << RX_DR | (1 << TX_DS) | (1 << MAX_RT)));
 }
 
 /**
@@ -119,21 +122,20 @@ static void nRF24L01_config(void)
  */
 void nRF24L01_init(void)
 {
-	_nRF24L01_init();
-	nRF24L01_config();
+    _nRF24L01_init();
+    nRF24L01_config();
 }
-
 
 /**
  * Sets receive address of pipe.
  * @param pipe Pipe 0 or 1
  * @param addr address of that pipe
  */
-void nRF24L01_set_RADDR_01(uint8_t pipe, const uint8_t * addr)
+void nRF24L01_set_RADDR_01(uint8_t pipe, const uint8_t *addr)
 // Sets the receiving address
 {
-	if(pipe < 2)
-		nRF24L01_write_register_long(RX_ADDR_P0 + pipe, addr, ADDRESS_WIDTH);
+    if (pipe < 2)
+        nRF24L01_write_register_long(RX_ADDR_P0 + pipe, addr, ADDRESS_WIDTH);
 }
 
 /**
@@ -143,14 +145,14 @@ void nRF24L01_set_RADDR_01(uint8_t pipe, const uint8_t * addr)
  */
 void nRF24L01_set_RADDR(uint8_t pipe, uint8_t addr)
 {
-	if(pipe < 6 && pipe > 1)
-		nRF24L01_write_register(RX_ADDR_P0 + pipe, addr);
+    if (pipe < 6 && pipe > 1)
+        nRF24L01_write_register(RX_ADDR_P0 + pipe, addr);
 }
 
 void nRF24L01_set_RXPW(uint8_t pipe, uint8_t len)
 {
-	if(pipe < 6)
-		nRF24L01_write_register(RX_PW_P0 + pipe, len);
+    if (pipe < 6)
+        nRF24L01_write_register(RX_PW_P0 + pipe, len);
 }
 
 /**
@@ -158,11 +160,11 @@ void nRF24L01_set_RXPW(uint8_t pipe, uint8_t len)
  * Waits for current transmission to complete.
  * @param addr target address
  */
-void nRF24L01_set_TADDR(const uint8_t * addr)
+void nRF24L01_set_TADDR(const uint8_t *addr)
 {
-    while(TxActive)
-    	;
-	nRF24L01_write_register_long(TX_ADDR, addr, ADDRESS_WIDTH);
+    while (TxActive)
+        ;
+    nRF24L01_write_register_long(TX_ADDR, addr, ADDRESS_WIDTH);
 }
 
 /**
@@ -171,36 +173,33 @@ void nRF24L01_set_TADDR(const uint8_t * addr)
  */
 void nRF24L01_enable_RPIPE(uint8_t pipe)
 {
-	uint8_t en_rxaddr;
-	en_rxaddr = nRF24L01_read_register(EN_RXADDR);
-	en_rxaddr |= (1 << pipe);
-	nRF24L01_write_register(EN_RXADDR, en_rxaddr);
+    uint8_t en_rxaddr;
+    en_rxaddr = nRF24L01_read_register(EN_RXADDR);
+    en_rxaddr |= (1 << pipe);
+    nRF24L01_write_register(EN_RXADDR, en_rxaddr);
 }
-
 
 /**
  * reads top fifo payload.
  * @param data array to put data in. must have up to 32 bytes!
  * @return number of bytes received
  */
-uint8_t nRF24L01_get_data(uint8_t * data)
+uint8_t nRF24L01_get_data(uint8_t *data)
 {
     uint8_t len;
     uint8_t status;
     status = nRF24L01_command(R_RX_PL_WID, &len, 1);
     (void) status;
-    
-    if(len > 32)
-    {
-    	nRF24L01_command(FLUSH_RX, 0, 0);
-    	return 0;
+
+    if (len > 32) {
+        nRF24L01_command(FLUSH_RX, 0, 0);
+        return 0;
     }
     nRF24L01_commandR(R_RX_PAYLOAD, data, len);
     nRF24L01_write_register(STATUS, (1 << RX_DR));
 
     return len;
 }
-
 
 /**
  * sends a packet to previously defined address.
@@ -209,83 +208,86 @@ uint8_t nRF24L01_get_data(uint8_t * data)
  * @param len number of bytes
  * @param rxAfterTx switch to RX mode right after transmission
  */
-void nRF24L01_send(const uint8_t * data, uint8_t len, uint8_t rxAfterTx)
+void nRF24L01_send(const uint8_t *data, uint8_t len, uint8_t rxAfterTx)
 {
 
-    while(TxActive)
-    	;
+    while (TxActive)
+        ;
 
     TX;
     nRF24L01_command(W_TX_PAYLOAD, data, len);
 
-    mirf_CE_hi;                     // Start transmission
-    if(rxAfterTx)
-    	TxActive = 2;
+    mirf_CE_hi
+    ; // Start transmission
+    if (rxAfterTx)
+        TxActive = 2;
     else
-    	TxActive = 1;
+        TxActive = 1;
     _delay_us(10);
-    mirf_CE_lo;
+    mirf_CE_lo
+    ;
 }
 
 /* wakes the RF chip up. Delays by 5 ms */
 void nRF24L01_wakeUp(uint8_t rx)
 {
-	mirf_CE_lo;
-	nRF24L01_write_register(CONFIG, DEF_CONFIG | PWR_UP);
-	_delay_ms(5);
-	if(rx) {
-		RX;
-		mirf_CE_hi;
-	}
+    mirf_CE_lo
+    ;
+    nRF24L01_write_register(CONFIG, DEF_CONFIG | PWR_UP);
+    _delay_ms(5);
+    if (rx) {
+        RX;
+        mirf_CE_hi
+        ;
+    }
 }
 
 /* put RF to deep power down. A wakeup is needed before the next transfer */
 void nRF24L01_sleep(void)
 {
-	mirf_CE_lo;
-	nRF24L01_write_register(CONFIG, DEF_CONFIG);
+    mirf_CE_lo
+    ;
+    nRF24L01_write_register(CONFIG, DEF_CONFIG);
 }
 
 void nRF24L01_IRQ(void)
 {
-	uint8_t status;
-	status = nRF24L01_command(NOP, 0, 0);
+    uint8_t status;
+    status = nRF24L01_command(NOP, 0, 0);
 
-	if(status & ((1 << TX_DS) | (1 << MAX_RT)))
-	{	/* doesn't matter if packet is transmitted successfully or not */
-		nRF24L01_command(FLUSH_TX, 0, 0);	/* on MAX_RT, packet is still there... */
+    if (status & ((1 << TX_DS) | (1 << MAX_RT))) { /* doesn't matter if packet is transmitted successfully or not */
+        nRF24L01_command(FLUSH_TX, 0, 0); /* on MAX_RT, packet is still there... */
 
-		if(TxActive == 2)
-		{
-			RX;
-			mirf_CE_hi;
-		}
+        if (TxActive == 2) {
+            RX;
+            mirf_CE_hi
+            ;
+        }
 
-		TxActive = 0;
-		/* clear status flags. as we do same action on both we may clear both. */
-		nRF24L01_write_register(STATUS, (1 << TX_DS) | (1 << MAX_RT));
-	}
+        TxActive = 0;
+        /* clear status flags. as we do same action on both we may clear both. */
+        nRF24L01_write_register(STATUS, (1 << TX_DS) | (1 << MAX_RT));
+    }
 #ifdef RX_CALLBACK
-	if(status & (1 << RX_DR))
-	{
-		rxCallback();
-	}
+    if (status & (1 << RX_DR)) {
+        rxCallback();
+    }
 #endif
-	}
+}
 
 uint8_t nRF24L01_isTransmitting(void)
 {
-	return TxActive;
+    return TxActive;
 }
 
 uint8_t nRF24L01_rxDataAvailable(void)
 {
-	uint8_t fifoStatus;
-	fifoStatus = nRF24L01_read_register(FIFO_STATUS);
-	return !(fifoStatus & (1 << RX_EMPTY));
+    uint8_t fifoStatus;
+    fifoStatus = nRF24L01_read_register(FIFO_STATUS);
+    return !(fifoStatus & (1 << RX_EMPTY));
 }
 
 void nRF24L01_set_rx_callback(void (*f)(void))
 {
-	rxCallback = f;
+    rxCallback = f;
 }

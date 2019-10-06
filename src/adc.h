@@ -6,17 +6,16 @@
 static inline uint16_t getAdc(uint8_t channel)
 {
 
-	ADMUX = (1 << REFS0) | (channel & 0x1F);
-	ADCSRA = (1 << ADEN) | (1 << ADSC) | (1 << ADPS2);
-	while (ADCSRA & (1 << ADSC))
-		/* Conversion time will be about 400 µs at first conversion, 200 µs any other */
-		;
-	return ADC;
+    ADMUX = (1 << REFS0) | (channel & 0x1F);
+    ADCSRA = (1 << ADEN) | (1 << ADSC) | (1 << ADPS2);
+    while (ADCSRA & (1 << ADSC))
+        /* Conversion time will be about 400 µs at first conversion, 200 µs any other */
+        ;
+    return ADC;
 }
 
 extern uint16_t BatteryMV;
 
 #define getBatteryVoltage() (BatteryMV)
-
 
 #endif /* ADC_H_ */

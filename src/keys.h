@@ -36,12 +36,12 @@
 
 void keyInit(void);
 void keyPeriodicScan(void);
-uint8_t get_key_press( uint8_t key_mask );
-uint8_t get_key_rpt( uint8_t key_mask );
-uint8_t get_key_short( uint8_t key_mask );
-uint8_t get_key_long( uint8_t key_mask );
+uint8_t get_key_press(uint8_t key_mask);
+uint8_t get_key_rpt(uint8_t key_mask);
+uint8_t get_key_short(uint8_t key_mask);
+uint8_t get_key_long(uint8_t key_mask);
 int8_t get_key_increment(void);
 
-extern volatile uint8_t key_state;                                // debounced and inverted key states
+extern volatile uint8_t key_state; // debounced and inverted key states
 
 #endif /* KEYS_H_ */

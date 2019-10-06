@@ -30,16 +30,14 @@
 /* Static Payload on all data pipes */
 #define DEF_DYNPD (1 << DPL_P0)
 
-
-
 // Public standart functions
 void nRF24L01_init(void);
-void nRF24L01_set_RADDR_01(uint8_t pipe, const uint8_t * addr);
+void nRF24L01_set_RADDR_01(uint8_t pipe, const uint8_t *addr);
 void nRF24L01_set_RADDR(uint8_t pipe, uint8_t addr);
-void nRF24L01_set_TADDR(const uint8_t * addr);
+void nRF24L01_set_TADDR(const uint8_t *addr);
 void nRF24L01_enable_RPIPE(uint8_t pipe);
-uint8_t nRF24L01_get_data(uint8_t * data);
-void nRF24L01_send(const uint8_t * data, uint8_t len, uint8_t rxAfterTx);
+uint8_t nRF24L01_get_data(uint8_t *data);
+void nRF24L01_send(const uint8_t *data, uint8_t len, uint8_t rxAfterTx);
 void nRF24L01_wakeUp(uint8_t rx);
 void nRF24L01_sleep(void);
 void nRF24L01_set_rx_callback(void (*f)(void));

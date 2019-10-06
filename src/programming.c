@@ -31,67 +31,64 @@ TIME dismissUntil = { 7, 0, 0, 0 };
 
 static uint8_t getHourProgram(uint8_t weekday, uint8_t hour)
 {
-	uint8_t hourProgram = ProgramData[weekday * PROGRAM_DATA_BYTES_PER_WEEKDAY
-				+ hour * PROGRAM_DATA_BYTES_PER_HOUR];
-	return hourProgram;
+    uint8_t hourProgram = ProgramData[weekday * PROGRAM_DATA_BYTES_PER_WEEKDAY + hour * PROGRAM_DATA_BYTES_PER_HOUR];
+    return hourProgram;
 }
 
 /**
  * returns temperature index for given program.
  */
-uint8_t getProgram(uint8_t weekday, uint8_t hour, uint8_t slice) {
-	uint8_t hourProgram = getHourProgram(weekday, hour);
-	uint8_t temperatureIndex = hourProgram >> (slice) * PROGRAM_BITS;
+uint8_t getProgram(uint8_t weekday, uint8_t hour, uint8_t slice)
+{
+    uint8_t hourProgram = getHourProgram(weekday, hour);
+    uint8_t temperatureIndex = hourProgram >> (slice) * PROGRAM_BITS;
 
-	temperatureIndex &= 0xFF << PROGRAM_BITS;
+    temperatureIndex &= 0xFF << PROGRAM_BITS;
 
-	return temperatureIndex;
+    return temperatureIndex;
 }
 
-void setProgram(uint8_t weekday, uint8_t hour, uint8_t slice, uint8_t temperatureIndex) {
-	uint8_t hourProgram = getHourProgram(weekday, hour);
+void setProgram(uint8_t weekday, uint8_t hour, uint8_t slice, uint8_t temperatureIndex)
+{
+    uint8_t hourProgram = getHourProgram(weekday, hour);
 
-	hourProgram &= ~(PROGRAM_BITS_SET << slice * PROGRAM_BITS);
-	hourProgram |= temperatureIndex << slice * PROGRAM_BITS;
+    hourProgram &= ~(PROGRAM_BITS_SET << slice * PROGRAM_BITS);
+    hourProgram |= temperatureIndex << slice * PROGRAM_BITS;
 
-	ProgramData[weekday * PROGRAM_DATA_BYTES_PER_WEEKDAY
-					+ hour * PROGRAM_DATA_BYTES_PER_HOUR] = hourProgram;
+    ProgramData[weekday * PROGRAM_DATA_BYTES_PER_WEEKDAY + hour * PROGRAM_DATA_BYTES_PER_HOUR] = hourProgram;
 }
 
 /**
  * loads a program for the current time.
  */
-void applyProgram(void) {
-	TIME time = getTime();
+void applyProgram(void)
+{
+    TIME time = getTime();
 
-	/* crappy weekday-overflow handling... */
-	if (dismissUntil.weekday != 7
-			&& (compareTime(time, dismissUntil) <= 0
-					|| (time.weekday > 3 && dismissUntil.weekday < 3))) {
-		displaySymbols(LCD_MANU, LCD_MANU | LCD_AUTO);
-	} else {
-		uint8_t temperatureIndex;
-		dismissUntil.weekday = 7;
-		temperatureIndex = getProgram(time.weekday, time.hour,
-				time.minute / PROGRAM_TIME_SLICE_MINUTES);
-		setNominalTemperature(Temperatures[temperatureIndex]);
-		displaySymbols(LCD_AUTO, LCD_MANU | LCD_AUTO);
-	}
+    /* crappy weekday-overflow handling... */
+    if (dismissUntil.weekday != 7 && (compareTime(time, dismissUntil) <= 0 || (time.weekday > 3 && dismissUntil.weekday < 3))) {
+        displaySymbols(LCD_MANU, LCD_MANU | LCD_AUTO);
+    } else {
+        uint8_t temperatureIndex;
+        dismissUntil.weekday = 7;
+        temperatureIndex = getProgram(time.weekday, time.hour, time.minute / PROGRAM_TIME_SLICE_MINUTES);
+        setNominalTemperature(Temperatures[temperatureIndex]);
+        displaySymbols(LCD_AUTO, LCD_MANU | LCD_AUTO);
+    }
 }
-
 
 void setTemperature(uint8_t num, uint16_t temperature)
 {
-	Temperatures[num] = temperature;
+    Temperatures[num] = temperature;
 }
-
 
 /**
  * disables program changing for given time.
  * @param quarterHours time in program-slices
  */
-void dismissProgramChanges(uint16_t minutes) {
-	TIME time = getTime();
-	addToTime(time, 0, minutes);
-	dismissUntil = time;
+void dismissProgramChanges(uint16_t minutes)
+{
+    TIME time = getTime();
+    addToTime(time, 0, minutes);
+    dismissUntil = time;
 }

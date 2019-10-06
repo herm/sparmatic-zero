@@ -13,7 +13,6 @@ uint8_t motorAdapt(void);
 uint8_t motorIsRunning(void);
 void motorTimer(void);
 
-
 extern volatile int16_t MotorPosition;
 extern int16_t PositionValveOpen;
 extern int16_t PositionValveClosed;

@@ -1,7 +1,6 @@
 #ifndef TIMER_H_
 #define TIMER_H_
 
-
 typedef void (*TimerCallback)(void);
 
 /*
@@ -18,10 +17,10 @@ extern volatile uint32_t SystemTime;
 
 typedef struct
 {
-	uint8_t weekday;
-	uint8_t hour;
-	uint8_t minute;
-	uint8_t second;
+    uint8_t weekday;
+    uint8_t hour;
+    uint8_t minute;
+    uint8_t second;
 } TIME;
 
 void timerInit(void);
@@ -39,12 +38,9 @@ TIME getTime(void);
 	time.hour %= 24; \
 }
 
-
 #define compareTime(a, b) \
 		((a.weekday < b.weekday) ? -1 : (a.weekday > b.weekday ? 1 : \
 				a.hour < b.hour ? -1 : (a.hour > b.hour ? 1 : \
 						a.minute < b.minute ? -1 : (a.minute == b.minute ? 0 : 1))))
-
-
 
 #endif /* TIMER_H_ */

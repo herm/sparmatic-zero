@@ -15,62 +15,46 @@
 #include "config.h"
 #include "encoder.h"
 
-volatile int8_t enc_delta;          // -128 ... 127
+volatile int8_t enc_delta; // -128 ... 127
 static volatile int8_t last;
 
-
-
-/// \brief .
-/// 
-/// 
-void encoderInit( void )
+void encoderInit(void)
 {
-  int8_t new;
-	
-	
-	ENCODER_DDR &= ~ENCODER_ALL;                // configure key port for input
-  ENCODER_PORT |= ENCODER_ALL;                // and turn on internal pull-up resistors
+    int8_t new;
 
-	// wake up from sleep (and scan) in interrupt
-	EIMSK |= (1 << PCIE1);	//PC-INT 8..15
-	PCMSK1 |= ENCODER_ALL; // Enable all switches PC-INT
- 
-  new = 0;
-  if( PHASE_A )
-    new = 3;
-  if( PHASE_B )
-    new ^= 1;                   // convert gray to binary
-  last = new;                   // power on state
-  enc_delta = 0;
+    ENCODER_DDR &= ~ENCODER_ALL; // configure key port for input
+    ENCODER_PORT |= ENCODER_ALL; // and turn on internal pull-up resistors
+
+    // wake up from sleep (and scan) in interrupt
+    EIMSK |= (1 << PCIE1); //PC-INT 8..15
+    PCMSK1 |= ENCODER_ALL; // Enable all switches PC-INT
+
+    new = 0;
+    if ( PHASE_A)
+        new = 3;
+    if ( PHASE_B)
+        new ^= 1; // convert gray to binary
+    last = new; // power on state
+    enc_delta = 0;
 
 }
 
-
-
-/// \brief .
-/// 
-/// 
 void encoderPeriodicScan(void)
 {
-  int8_t new, diff;
- 
-  new = 0;
-  if( PHASE_A )
-    new = 3;
-  if( PHASE_B )
-    new ^= 1;                   // convert gray to binary
-  diff = last - new;                // difference last - new
-  if( diff & 1 ){               // bit 0 = value (1)
-    last = new;                 // store new as next last
-    enc_delta += (diff & 2) - 1;        // bit 1 = direction (+/-)
-  }
+    int8_t new, diff;
+
+    new = 0;
+    if ( PHASE_A)
+        new = 3;
+    if ( PHASE_B)
+        new ^= 1; // convert gray to binary
+    diff = last - new; // difference last - new
+    if (diff & 1) { // bit 0 = value (1)
+        last = new; // store new as next last
+        enc_delta += (diff & 2) - 1; // bit 1 = direction (+/-)
+    }
 }
 
-
-
-/// \brief .
-/// 
-/// 
 #if ENCODER == 1
 #warning encoder 1
 int8_t encoderRead( void )         // read single step encoders
@@ -87,15 +71,15 @@ int8_t encoderRead( void )         // read single step encoders
 
 #if ENCODER == 2 
 // #warning encoder 2
-int8_t encoderRead( void )         // read two step encoders
+int8_t encoderRead(void) // read two step encoders
 {
-  int8_t val;
- 
-  cli();
-  val = enc_delta;
-  enc_delta = val & 1;
-  sei();
-  return val >> 1;
+    int8_t val;
+
+    cli();
+    val = enc_delta;
+    enc_delta = val & 1;
+    sei();
+    return val >> 1;
 }
 #endif
 

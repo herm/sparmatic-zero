@@ -36,37 +36,35 @@
 #define DD_OWN_SS	DDB0		/* Sparmatic: This pin is used as button '+' or rotary input */
 #define DD_SCK      DDB1
 
-
 void spi_init()
 // Initialize pins for spi communication
 {
-	SPSR = (1 << SPI2X); // Double Clock Rate
+    SPSR = (1 << SPI2X); // Double Clock Rate
 
-	SPI_MSTR;
+    SPI_MSTR
+    ;
 }
 
-void spi_rw(uint8_t * data, uint8_t len)
+void spi_rw(uint8_t *data, uint8_t len)
 // Shift full array through target device
 {
-	uint8_t i;
-	for (i = 0; i < len; i++) {
-		SPDR = data[i];
-		while((SPSR & (1<<SPIF))==0)
-			;
-		data[i] = SPDR;
-	}
+    uint8_t i;
+    for (i = 0; i < len; i++) {
+        SPDR = data[i];
+        while ((SPSR & (1 << SPIF)) == 0)
+            ;
+        data[i] = SPDR;
+    }
 }
 
-void spi_w(const uint8_t * dataout, uint8_t len)
+void spi_w(const uint8_t *dataout, uint8_t len)
 // Shift full array to target device without receiving any byte
 {
-	uint8_t i;
-	for (i = 0; i < len; i++) {
-		SPDR = dataout[i];
-		while((SPSR & (1<<SPIF))==0)
-			;
-	}
+    uint8_t i;
+    for (i = 0; i < len; i++) {
+        SPDR = dataout[i];
+        while ((SPSR & (1 << SPIF)) == 0)
+            ;
+    }
 }
-
-
 
