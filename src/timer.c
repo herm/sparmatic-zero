@@ -1,24 +1,7 @@
-/// \file timer.c
-/// 
-/// 
-/// 
-/*
- * timer.c
- *
- *  Created on: 20.11.2011
- *      Author: matthias
- */
-
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include "timer.h"
 
-// typedef void (*TimerCallback)(void);
-
-static volatile uint8_t Seconds;
-static uint8_t Minutes;
-static uint8_t Hours;
-static uint8_t Weekday;
 volatile uint8_t Timer0H;
 volatile uint32_t SystemTime;
 
@@ -26,20 +9,11 @@ static volatile TIME Time;
 
 static TimerCallback TimeoutCallback;
 
-
-
-/// \brief .
-/// 
-/// 
 ISR(TIMER0_OVF_vect) 
 {
 	++Timer0H;
 }
 
-
-/// \brief .
-/// 
-/// 
 ISR(TIMER0_COMP_vect) 
 {
 	if(TimeoutCallback) 
@@ -51,10 +25,6 @@ ISR(TIMER0_COMP_vect)
 
 }
 
-
-/// \brief .
-/// 
-/// 
 /* used for waking up the device periodically */
 ISR(TIMER2_OVF_vect)
 {
@@ -86,9 +56,6 @@ ISR(TIMER2_OVF_vect)
 }
 
 
-/// \brief .
-/// 
-/// 
 void timerInit(void)
 {
 	ASSR |= (1 << AS2);
@@ -105,9 +72,6 @@ void timerInit(void)
 }
 
 
-/// \brief .
-/// 
-/// 
 void enableTimeout(TimerCallback cbk, uint8_t timeout)
 {
 	TimeoutCallback = cbk;
@@ -116,19 +80,12 @@ void enableTimeout(TimerCallback cbk, uint8_t timeout)
 	TIMSK0 |= (1 << OCIE0A);
 }
 
-
-/// \brief .
-/// 
-/// 
 void setTimeout(uint8_t timeout)
 {
 	OCR0A = TCNT0 + timeout;
 }
 
 
-/// \brief .
-/// 
-/// 
 void disableTimeout()
 {
 	TIMSK0 &= ~(1 << OCIE1A);
@@ -136,22 +93,6 @@ void disableTimeout()
 }
 
 
-/// \brief .
-/// 
-/// 
-void setTime(uint8_t weekday, uint8_t hour, uint8_t minute)
-{
-	cli();
-	Minutes = minute;
-	Hours = hour;
-	Weekday = weekday;
-	sei();
-}
-
-
-/// \brief .
-/// 
-/// 
 TIME getTime(void)
 {
 	TIME res;

@@ -88,7 +88,7 @@ int8_t encoderRead( void )         // read single step encoders
 #endif
 
 #if ENCODER == 2 
-#warning encoder 2
+// #warning encoder 2
 int8_t encoderRead( void )         // read two step encoders
 {
   int8_t val;

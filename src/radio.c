@@ -31,6 +31,7 @@ void radioRxDataAvailable(void)
 	uint8_t rxData[32];
 	uint8_t readLen;
 	readLen = nRF24L01_get_data(rxData);
+    (void) readLen;
 }
 
 

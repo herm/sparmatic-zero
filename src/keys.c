@@ -134,7 +134,7 @@ uint8_t get_key_long( uint8_t key_mask )
 int8_t get_key_increment(void)
 {
 	#ifdef ENCODER
-	#warning encoder gets key increment
+// 	#warning encoder gets key increment
 	int8_t keys = encoderRead();
 	// limit
 	if (keys > 0)

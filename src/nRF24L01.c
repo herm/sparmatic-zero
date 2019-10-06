@@ -193,7 +193,8 @@ uint8_t nRF24L01_get_data(uint8_t * data)
     uint8_t len;
     uint8_t status;
     status = nRF24L01_command(R_RX_PL_WID, &len, 1);
-
+    (void) status;
+    
     if(len > 32)
     {
     	nRF24L01_command(FLUSH_RX, 0, 0);

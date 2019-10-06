@@ -26,7 +26,7 @@
 
 #ifdef ENCODER
 #include "encoder.h"
-#warning "encoder being included"
+// #warning "encoder being included"
 #endif
 
 #ifdef BOOTLOADER
@@ -269,7 +269,6 @@ static uint8_t valveInit(void)
 /// 
 int main(void)
 {
-	uint32_t lastStatusMessageSent = 0;
 	_delay_ms(50);
 	timerInit();
 	pwrInit();

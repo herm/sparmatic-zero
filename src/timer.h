@@ -1,15 +1,3 @@
-/// \file timer.h
-/// 
-/// 
-/// 
-
-/*
- * timer.h
- *
- *  Created on: 20.11.2011
- *      Author: matthias
- */
-
 #ifndef TIMER_H_
 #define TIMER_H_
 
@@ -40,7 +28,6 @@ void timerInit(void);
 void enableTimeout(TimerCallback cbk, uint8_t timeout);
 void setTimeout(uint8_t timeout);
 void disableTimeout(void);
-void setTime(uint8_t weekday, uint8_t hour, uint8_t minute);
 TIME getTime(void);
 
 #define addToTime(time, hours, minutes) \
