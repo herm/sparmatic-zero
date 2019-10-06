@@ -160,15 +160,6 @@ ISR(PCINT0_vect)
 	#endif
 }
 
-ISR(PCINT1_vect)
-{
-    /* used for waking up the device by key press*/
-    LCDCRA |= (1 << LCDIE);
-
-#ifdef ENCODER
-    encoderPeriodicScan();
-#endif
-}
 
 static void sysSleep(void)
 {

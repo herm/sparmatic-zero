@@ -131,7 +131,18 @@ void keyInit(void)
     KEY_DDR &= ~KEY_ALL; // configure key port for input
     KEY_PORT |= KEY_ALL; // and turn on pull up resistors
 
+    // Enable interrupt as a wake-up source
     EIMSK |= (1 << PCIE1); //PC-INT 8..15
     PCMSK1 |= KEY_ALL; // Enable all switches PC-INT
 
+}
+
+ISR(PCINT1_vect)
+{
+    /* used for waking up the device by key press*/
+    LCDCRA |= (1 << LCDIE);
+
+#ifdef ENCODER
+    encoderPeriodicScan();
+#endif
 }
