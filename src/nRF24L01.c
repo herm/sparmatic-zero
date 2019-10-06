@@ -30,12 +30,12 @@
 */
 
 #include <stdint.h>
+#include <util/delay.h>
 
 #include "nRF24L01.h"
 #include "nRF24L01_reg.h"
 #include "nRF24L01_ll.h"
 #include "spi.h"
-#include "wait.h"
 
 // Defines for setting the MiRF registers for transmitting or receiving mode
 #define TX nRF24L01_write_register(CONFIG, DEF_CONFIG | ( (1<<PWR_UP) | (0<<PRIM_RX) ) )
@@ -227,7 +227,7 @@ void nRF24L01_send(const uint8_t * data, uint8_t len, uint8_t rxAfterTx)
     	TxActive = 2;
     else
     	TxActive = 1;
-    wait10us();
+    _delay_us(10);
     mirf_CE_lo;
 }
 
@@ -236,7 +236,7 @@ void nRF24L01_wakeUp(uint8_t rx)
 {
 	mirf_CE_lo;
 	nRF24L01_write_register(CONFIG, DEF_CONFIG | PWR_UP);
-	waitms(5);
+	_delay_ms(5);
 	if(rx) {
 		RX;
 		mirf_CE_hi;
