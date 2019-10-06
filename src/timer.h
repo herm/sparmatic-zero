@@ -12,7 +12,9 @@
 
 #ifndef TIMER_H_
 #define TIMER_H_
-#include "timerdef.h"
+
+
+typedef void (*TimerCallback)(void);
 
 /*
  * 1/32th second per step.
