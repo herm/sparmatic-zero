@@ -8,6 +8,7 @@
 #include "config.h"
 #include "main.h"
 
+#include "debug.h"
 #include "lcd.h"
 #include "keys.h"
 #include "ntc.h"
@@ -183,7 +184,11 @@ static void sysSleep(void)
 
 void pwrInit(void)
 {
+#if DEBUG_ENABLED
+    PRR = (1 << PRTIM1); // disable some hardware
+#else
     PRR = (1 << PRTIM1) | (1 << PRUSART0); // disable some hardware
+#endif
     set_sleep_mode(SLEEP_MODE_PWR_SAVE);
     PCMSK0 |= (1 << PCINT0); /* emergency power loss IRQ */
     DDRE &= ~(1 << PE0);
@@ -209,7 +214,9 @@ static uint8_t valveInit(void)
     // wait for user input
     displayString("INST");
     while (!get_key_press(1 << KEY_OK))
-        ;
+    {
+//        debugBinary(PINB);
+    }
 
     // close valve (protract actuator)
     displayString("ADAP");
@@ -224,6 +231,7 @@ static uint8_t valveInit(void)
 int main(void)
 {
     _delay_ms(50);
+    debugInit();
     timerInit();
     pwrInit();
     ioInit();
@@ -238,7 +246,6 @@ int main(void)
 	funkInit();
 	#endif
     sei();
-
 #if 1
     if (valveInit()) {
         while (1) // we do not want to operate with an incorrect setup
