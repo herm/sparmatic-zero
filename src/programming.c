@@ -1,15 +1,3 @@
-/// \file programming.c
-/// 
-/// 
-/// 
-
-/*
- * programming.c
- *
- *  Created on: 24.01.2012
- *      Author: matthias
- */
-
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <avr/sleep.h>
@@ -41,11 +29,6 @@ int16_t Temperatures[4] = { 2050, 1450, 1650, 2200 };
 /* weekday == 7 -> no dismiss */
 TIME dismissUntil = { 7, 0, 0, 0 };
 
-
-
-/// \brief .
-/// 
-/// 
 static uint8_t getHourProgram(uint8_t weekday, uint8_t hour)
 {
 	uint8_t hourProgram = ProgramData[weekday * PROGRAM_DATA_BYTES_PER_WEEKDAY
@@ -53,10 +36,6 @@ static uint8_t getHourProgram(uint8_t weekday, uint8_t hour)
 	return hourProgram;
 }
 
-
-/// \brief .
-/// 
-/// 
 /**
  * returns temperature index for given program.
  */
@@ -69,10 +48,6 @@ uint8_t getProgram(uint8_t weekday, uint8_t hour, uint8_t slice) {
 	return temperatureIndex;
 }
 
-
-/// \brief .
-/// 
-/// 
 void setProgram(uint8_t weekday, uint8_t hour, uint8_t slice, uint8_t temperatureIndex) {
 	uint8_t hourProgram = getHourProgram(weekday, hour);
 
@@ -83,10 +58,6 @@ void setProgram(uint8_t weekday, uint8_t hour, uint8_t slice, uint8_t temperatur
 					+ hour * PROGRAM_DATA_BYTES_PER_HOUR] = hourProgram;
 }
 
-
-/// \brief .
-/// 
-/// 
 /**
  * loads a program for the current time.
  */
@@ -109,18 +80,12 @@ void applyProgram(void) {
 }
 
 
-/// \brief .
-/// 
-/// 
 void setTemperature(uint8_t num, uint16_t temperature)
 {
 	Temperatures[num] = temperature;
 }
 
 
-/// \brief .
-/// 
-/// 
 /**
  * disables program changing for given time.
  * @param quarterHours time in program-slices

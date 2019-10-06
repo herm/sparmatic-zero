@@ -1,15 +1,3 @@
-/// \file ntc.h
-/// 
-/// 
-/// 
-
-/*
- * ntc.h
- *
- *  Created on: 19.11.2011
- *      Author: matthias
- */
-
 #ifndef NTC_H_
 #define NTC_H_
 

@@ -1,8 +1,3 @@
-/// \file keys.c
-/// 
-/// 
-/// 
-
 /************************************************************************/
 /*                                                                      */
 /*                      Debouncing 8 Keys                               */
@@ -25,7 +20,6 @@
 #include "keys.h"
 
 #ifndef F_CPU
-#define F_CPU           1000000                   // processor clock frequency
 #error F_CPU not defined
 #endif
 

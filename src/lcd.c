@@ -1,15 +1,3 @@
-/// \file lcd.c
-/// 
-/// 
-/// 
-
-/*
- * lcd.c
- *
- *  Created on: 18.11.2011
- *      Author: matthias
- */
-
 #include <avr/io.h>
 #include <avr/pgmspace.h>
 #include <stdlib.h>
@@ -96,9 +84,6 @@ static const uint8_t WeekdaySegments[] PROGMEM = {128, 129, 130, 131, 132, 133, 
 static const uint8_t SymbolSegments[] PROGMEM = {80, 120, 40, 23, 24, 64, 104, 144, 103, 143, 135, 0};
 
 
-/// \brief .
-/// 
-/// 
 static void segmentOn(uint8_t segment)
 {
 	uint8_t volatile *segmentBase = &LCDDR0;
@@ -106,9 +91,6 @@ static void segmentOn(uint8_t segment)
 }
 
 
-/// \brief .
-/// 
-/// 
 static void segmentOff(uint8_t segment)
 {
 	uint8_t volatile *segmentBase = &LCDDR0;
@@ -116,9 +98,6 @@ static void segmentOff(uint8_t segment)
 }
 
 
-/// \brief .
-/// 
-/// 
 static void segmentSwitch(uint8_t segment, uint8_t on)
 {
 	if(on)
@@ -128,9 +107,6 @@ static void segmentSwitch(uint8_t segment, uint8_t on)
 }
 
 
-/// \brief .
-/// 
-/// 
 static void displayDigit(uint16_t segments, uint8_t pos)
 {
 	uint8_t segmentOffset = pos * SEGMENTS_PER_DIGIT;
@@ -144,9 +120,6 @@ static void displayDigit(uint16_t segments, uint8_t pos)
 }
 
 
-/// \brief .
-/// 
-/// 
 /**
  * Displays the bargraph.
  * @param bargraphOn each bit represents one hour on the bargraph.
@@ -161,9 +134,6 @@ void displayBargraph(uint32_t bargraphOn)
 }
 
 
-/// \brief .
-/// 
-/// 
 /**
  * Displays the weekday bar.
  * @param dayOn each bit represents one day to display
@@ -178,9 +148,6 @@ void displayWeekday(uint8_t dayOn)
 }
 
 
-/// \brief .
-/// 
-/// 
 /**
  * Displays a symbol on the LCD. Only masked ones are taken into account.
  * @param on turn on these symbols
@@ -198,9 +165,6 @@ void displaySymbols(LCD_SYMBOLS on, LCD_SYMBOLS mask)
 }
 
 
-/// \brief .
-/// 
-/// 
 /**
  * Outputs one digit at given position.
  * @param c ASCII character to display
@@ -216,9 +180,6 @@ void displayAsciiDigit(char c, uint8_t pos)
 }
 
 
-/// \brief .
-/// 
-/// 
 /**
  * Outputs a string on the display, beginning on the left digit.
  * @param str string to display, it is displayed up to NUM_DIGITS
@@ -268,10 +229,6 @@ void displayNumber(int16_t num, int8_t width)
 }
 
 
-
-/// \brief .
-/// 
-/// 
 void lcdInit(void)
 {
 LCDCRB = (1<<LCDCS)|(0<<LCD2B)|(1<<LCDMUX1)|(1<<LCDMUX0)|(1<<LCDPM2)|(1<<LCDPM1)|(1<<LCDPM0);
@@ -307,10 +264,6 @@ LCDCRA = (1<<LCDEN)|(1<<LCDAB)|(0<<LCDIE)|(0<<LCDBL);
 */
 }
 
-
-/// \brief .
-/// 
-/// 
 void lcdOff(void)
 {
 	LCDCRA |= (1 << LCDBL);

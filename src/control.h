@@ -1,15 +1,4 @@
-/// \file control.h
-/// 
-/// 
-/// 
-
-/*
- * control.h
- *
- *  Created on: 24.01.2012
- *      Author: matthias
- */
-
+/* PID control algorithm. */
 #ifndef CONTROL_H_
 #define CONTROL_H_
 

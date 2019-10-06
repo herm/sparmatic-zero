@@ -1,8 +1,3 @@
-/// \file spi.c
-/// 
-/// 
-/// 
-
 /*
  Copyright (c) 2007 Stefan Engelke <mbox@stefanengelke.de>
 
@@ -42,11 +37,6 @@
 #define DD_SCK      DDB1
 
 
-
-
-/// \brief .
-/// 
-/// 
 void spi_init()
 // Initialize pins for spi communication
 {
@@ -55,10 +45,6 @@ void spi_init()
 	SPI_MSTR;
 }
 
-
-/// \brief .
-/// 
-/// 
 void spi_rw(uint8_t * data, uint8_t len)
 // Shift full array through target device
 {
@@ -71,10 +57,6 @@ void spi_rw(uint8_t * data, uint8_t len)
 	}
 }
 
-
-/// \brief .
-/// 
-/// 
 void spi_w(const uint8_t * dataout, uint8_t len)
 // Shift full array to target device without receiving any byte
 {

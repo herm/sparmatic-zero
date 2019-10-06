@@ -1,8 +1,3 @@
-/// \file funk.c
-/// 
-/// 
-/// 
-
 /*
  * high layer rf protocol.
  */
@@ -22,10 +17,7 @@
 extern uint16_t BatteryMV;
 
 
-
-/// \brief .
-/// 
-/// 
+//TODO: This function seems to do nothing useful
 void radioRxDataAvailable(void)
 {
 	uint8_t rxData[32];
@@ -34,11 +26,6 @@ void radioRxDataAvailable(void)
     (void) readLen;
 }
 
-
-
-/// \brief .
-/// 
-/// 
 /**
  * initializes lower level rf protocol, sets high level address.
  * @param ownAddress high level address: 2-255
@@ -52,21 +39,6 @@ void radioInit(void)
 }
 
 
-/// \brief .
-/// 
-/// 
-/*
-void txPacket(uint8_t adr, MESSAGE_TYPE type, uint8_t *data)
-{
-	nRF24L01_wakeUp(0);
-	nRF24L01_send(data, 32, 1);
-}
-*/
-
-
-/// \brief .
-/// 
-/// 
 void radioSend(void)
 {
 	MSG_FROM_THRM msg;

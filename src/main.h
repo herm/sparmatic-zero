@@ -1,11 +1,5 @@
-/// \file main.h
-/// 
-/// 
-/// 
-
 #ifndef MAIN_H_
 #define MAIN_H_
-
 
 #define ADC_CH_REF 30
 #define ADC_REF_MV 1100

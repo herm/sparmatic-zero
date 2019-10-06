@@ -1,9 +1,4 @@
-/// \file spi.h
-/// 
-/// 
-/// 
-
-
+//SPI functions for communication with the nRF24L01
 /*
     Copyright (c) 2007 Stefan Engelke <mbox@stefanengelke.de>
 

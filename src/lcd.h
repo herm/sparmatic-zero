@@ -1,16 +1,3 @@
-/// \file lcd.h
-/// 
-/// 
-/// 
-
-
-/*
- * lcd.h
- *
- *  Created on: 18.11.2011
- *      Author: matthias
- */
-
 #ifndef LCD_H_
 #define LCD_H_
 

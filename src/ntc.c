@@ -1,15 +1,3 @@
-/// \file ntc.c
-/// 
-/// 
-/// 
-
-/*
- * ntc.c
- *
- *  Created on: 19.11.2011
- *      Author: matthias
- */
-
 #include <avr/io.h>
 #include <avr/pgmspace.h>
 #include "adc.h"
@@ -29,7 +17,7 @@
 static const uint16_t NtcRes[] PROGMEM = {
 	34090		, //  0°C
 	26310		, //  5°C
-20440		, // 10°C
+	20440		, // 10°C
 	16000		, // 15°C
 	12610		, // 20°C
 	10000		, // 25°C
@@ -39,7 +27,7 @@ static const uint16_t NtcRes[] PROGMEM = {
 	 4202		, // 45°C
 	 3431		, // 50°C
 	 2816		, // 55°C
- 2322		, // 60°C
+	 2322		, // 60°C
 	 1925		, // 65°C
 	 1603		, // 70°C
 	 1340		, // 75°C
@@ -54,19 +42,11 @@ int16_t Temperature;
 int16_t NTCOffset = 0;
 
 
-
-/// \brief .
-/// 
-/// 
 void ntcInit(void)
 {
 	NTC_DDR |= (1 << NTC_PIN);
 }
 
-
-/// \brief .
-/// 
-/// 
 static uint16_t getNtcAdc(void)
 {
 	uint16_t ntc;
@@ -76,11 +56,6 @@ static uint16_t getNtcAdc(void)
 	return ntc;
 }
 
-
-
-/// \brief .
-/// 
-/// 
 /** returns temperature * 100 */
 void updateNtcTemperature(void)
 {

@@ -1,14 +1,3 @@
-/// \file control.c
-/// 
-/// 
-/// 
-
-/*
- * control.c
- *
- *  Created on: 24.01.2012
- *      Author: matthias
- */
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <avr/sleep.h>
@@ -37,11 +26,6 @@ CONTROLLER controller = {
 };
 
 
-
-
-/// \brief .
-/// 
-/// 
 /**
  * controller main function. Has to be called some times.
  * exact timing does not matter, but once a minute should be the minimum!
@@ -91,10 +75,6 @@ void control(void)
 	controller = ctrl;
 }
 
-
-/// \brief .
-/// 
-/// 
 /**
  * should be called to set nominal temperature.
  * @param temperature

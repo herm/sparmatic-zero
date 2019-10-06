@@ -1,15 +1,3 @@
-/// \file programming.h
-/// 
-/// 
-/// 
-
-/*
- * programming.h
- *
- *  Created on: 24.01.2012
- *      Author: matthias
- */
-
 #ifndef PROGRAMMING_H_
 #define PROGRAMMING_H_
 

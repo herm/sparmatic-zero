@@ -1,8 +1,3 @@
-/// \file main.c
-/// 
-/// 
-/// 
-
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <avr/sleep.h>
@@ -42,11 +37,6 @@
 
 uint16_t BatteryMV;
 
-
-
-/// \brief .
-/// 
-/// 
 static void updateBattery(void)
 {
 	uint16_t adc = getAdc(ADC_CH_REF);
@@ -61,8 +51,6 @@ static void updateBattery(void)
 
 
 /// \brief Disable hardware and save data to non-volatile memory on battery removal.
-/// 
-/// 
 static void sysShutdown(void)
 {
 		// Lcd_Symbol(BAT, 1 );	// TESTING (barely visible)
@@ -180,11 +168,6 @@ ISR(PCINT0_vect)
 	#endif
 }
 
-
-
-/// \brief .
-/// 
-/// 
 ISR(PCINT1_vect)
 {
 /* used for waking up the device by key press*/
@@ -195,11 +178,6 @@ ISR(PCINT1_vect)
 	#endif
 }
 
-
-
-/// \brief .
-/// 
-/// 
 static void sysSleep(void) {
 	OCR2A = 0;
 	ADCSRA &= ~(1 << ADEN); // Disable ADC
@@ -211,10 +189,6 @@ static void sysSleep(void) {
 	displaySymbols(0, LCD_BATTERY);
 }
 
-
-/// \brief .
-/// 
-/// 
 void pwrInit(void)
 {
   PRR = (1 << PRTIM1) | (1 << PRUSART0); // disable some hardware
@@ -225,9 +199,6 @@ void pwrInit(void)
 }
 
 
-/// \brief .
-/// 
-/// 
 void ioInit(void)
 {
   DIDR0 = 0xFF;	/* Disable digital inputs on Port F */
@@ -263,10 +234,6 @@ static uint8_t valveInit(void)
 	return 0;
 }
 
-
-/// \brief .
-/// 
-/// 
 int main(void)
 {
 	_delay_ms(50);

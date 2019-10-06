@@ -1,8 +1,3 @@
-/// \file menu.c
-/// 
-/// 
-/// 
-
 #include <stdint.h>
 
 #include <avr/io.h>
@@ -123,11 +118,6 @@ static uint8_t inputSelector(const char text[][5], uint8_t min, uint8_t max, uin
 	return value;
 }
 
-
-
-/// \brief .
-/// 
-/// 
 void menu(void) 
 {
 	static MENU currentMenu = MENU_MAIN;
@@ -296,6 +286,7 @@ void menu(void)
 			#else
 			// show message
 			#endif
+			break;
 		}
 		
 		default:

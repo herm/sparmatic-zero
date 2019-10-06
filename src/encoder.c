@@ -1,5 +1,3 @@
-// \file encoder.c
-// 
 // Mechanical rotary encoder in Eurotronic Sparmatic Comet / Aldi Thermy 2011
 // 
 // The encoder has detents on states 00 and 11 (PB7 PB0)

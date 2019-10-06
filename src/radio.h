@@ -1,16 +1,3 @@
-/// \file radio.h
-/// 
-/// 
-/// 
-
-
-/*
- * radio.h
- *
- *  Created on: 17.11.2011
- *      Author: matthias
- */
-
 #ifndef RADIO_H_
 #define RADIO_H_
 
@@ -70,4 +57,4 @@ typedef struct {
 void radioInit(void);
 void radioSend(void);
 
-#endif /* FUNK_H_ */
+#endif /* RADIO_H_ */

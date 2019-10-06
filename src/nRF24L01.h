@@ -1,16 +1,3 @@
-/// \file nRF24L01.h
-/// 
-/// 
-/// 
-
-
-/*
- * nRF24L01.h
- *
- *  Created on: 12.11.2011
- *      Author: matthias
- */
-
 #ifndef NRF24L01_H_
 #define NRF24L01_H_
 

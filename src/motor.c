@@ -1,15 +1,3 @@
-/// \file motor.c
-/// 
-/// 
-/// 
-
-/*
- * motor.c
- *
- *  Created on: 19.11.2011
- *      Author: matthias
- */
-
 #include <avr/io.h>
 #include <util/delay.h>
 
@@ -18,21 +6,8 @@
 #include "motor.h"
 #include "timer.h"
 #include "adc.h"
+#include "config.h
 
-
-#define MOTOR_PORT PORTE
-#define MOTOR_DDR DDRE
-#define MOTOR_PIN_L PE7
-#define MOTOR_PIN_R PE6
-
-#define MOTOR_SENSE_DDR DDRE
-#define MOTOR_SENSE_PORT PORTE
-#define MOTOR_SENSE_PORT_IN PINE
-#define MOTOR_SENSE_LED_PIN PE2
-
-
-#define ADC_CH_MOTOR (2)
-#define ADC_CH_MOTOR_SENSE (0)
 #define MOTOR_DIR_OUT (MOTOR_DDR |= (1 << MOTOR_PIN_L) | (1 << MOTOR_PIN_R))
 #define MOTOR_DIR_IN (MOTOR_DDR &= ~(1 << MOTOR_PIN_L) | (1 << MOTOR_PIN_R))
 #define MOTOR_STOP (MOTOR_PORT &= ~((1 << MOTOR_PIN_L) | (1 << MOTOR_PIN_R)))
@@ -47,30 +22,6 @@
 #define DIR_OPEN 1
 #define DIR_CLOSE -1
 #define DIR_STOP 0
-
-/* hardcoded blocking current limit. Currents are in ADC digits.
- * For real current the formular is as follows:
- * I = (1024 - ADCval) * Ubat / 2.2 */
-#define MOTOR_CURRENT_BLOCK 930
-/* harder limit for detecting open end position */
-#define MOTOR_CURRENT_BLOCK_OPEN 950
-/* minimum change in current to detect valve */
-#define MOTOR_CURRENT_VALVE_DETECT 5
-/* all speeds are given in ms per tick.
- * A tick is a period on motor sense pin: LH for Forward, HL for Backwards.
- */
-/* block: Stop if no pulse is received in that interval */
-#define MOTOR_SPEED_BLOCK 110
-/* faster turn off at open end position */
-#define MOTOR_SPEED_BLOCK_OPEN 60
-
-#define MOTOR_POSITION_MAX 380
-/* ventOpen - ventClosed has to be min. X motor steps */
-#define MOTOR_VENT_RANGE_MIN 70
-
-/* stop earlier than target */
-#define MOTOR_TARGET_STOP_EARLY 6
-#define MOTOR_TARGET_HYSTERESIS 10
 
 typedef enum {STOP_NULL = 0, STOP_TIMEOUT = 1, STOP_CURRENT = 2, STOP_POSITION = 4, STOP_TARGET = 8} MOTOR_STOP_SOURCE;
 
@@ -95,10 +46,6 @@ static int16_t TargetPosition = -1;
  * Motorstrom starke Belastung
  */
 
-
-/// \brief .
-/// 
-/// 
 void motorInit(void)
 {
 	  MOTOR_PORT &= ~((1 << MOTOR_PIN_L) | (1 << MOTOR_PIN_R));
@@ -107,19 +54,12 @@ void motorInit(void)
 	  PCMSK0 |= (1 << PCINT1);
 }
 
-
-/// \brief .
-/// 
-/// 
 static uint16_t getCurrent(void)
 {
 	return getAdc(ADC_CH_MOTOR);
 }
 
 
-/// \brief .
-/// 
-/// 
 void motorStopMove(void)
 {
 	disableTimeout();
@@ -130,10 +70,6 @@ void motorStopMove(void)
 	Direction = DIR_STOP;
 }
 
-
-/// \brief .
-/// 
-/// 
 void motorStopTimeout(void)
 {
 	MotorStopSource |= STOP_TIMEOUT;
@@ -141,9 +77,6 @@ void motorStopTimeout(void)
 }
 
 
-/// \brief .
-/// 
-/// 
 static void motorMove(int8_t dir)
 {
 	MOTOR_SENSE_ON;
@@ -168,10 +101,6 @@ static void motorMove(int8_t dir)
 	MOTOR_TIMER_START;
 }
 
-
-/// \brief .
-/// 
-/// 
 /**
  * drives valve position to given value.
  * @param valve valve opening from 0..255
@@ -193,10 +122,6 @@ void motorMoveTo(uint8_t valve)
 
 }
 
-
-/// \brief .
-/// 
-/// 
 /*
  * resets motor calibration and fully opens until block.
  * @return not zero on hardware failure (no other errors possible)
@@ -218,9 +143,6 @@ uint8_t motorFullOpen(void)
 }
 
 
-/// \brief .
-/// 
-/// 
 /*
  * Closes until detection of touching the vent. close further until fully closed.
  * @return not zero on error
@@ -304,19 +226,11 @@ uint8_t motorStep(void)
 	return 0;
 }
 
-
-/// \brief .
-/// 
-/// 
 uint8_t motorIsRunning(void)
 {
 	return (Direction != DIR_STOP);
 }
 
-
-/// \brief .
-/// 
-/// 
 /**
  * periodic callback as long as the motor is running.
  * used for current limit or stop condition tests.

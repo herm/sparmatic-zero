@@ -1,15 +1,3 @@
-/// \file adc.h
-/// 
-/// 
-/// 
-
-/*
- * adc.h
- *
- *  Created on: 06.01.2012
- *      Author: matthias
- */
-
 #ifndef ADC_H_
 #define ADC_H_
 

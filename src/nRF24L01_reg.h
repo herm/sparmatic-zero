@@ -1,9 +1,3 @@
-/// \file nRF24L01_reg.h
-/// 
-/// 
-/// 
-
-
 /*
     Copyright (c) 2007 Stefan Engelke <mbox@stefanengelke.de>
 
