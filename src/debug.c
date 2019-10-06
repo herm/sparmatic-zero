@@ -36,3 +36,11 @@ void debugBinary(uint16_t n)
     debugString(buf);
     debugString("\r\n");
 }
+
+void debugHex(uint16_t n)
+{
+    char buf[5];
+    itoa(n, buf, 16);
+    debugString(buf);
+    debugString("\r\n");
+}

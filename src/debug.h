@@ -6,5 +6,6 @@ void debugInit(void);
 void debugString(char *s);
 void debugNumber(uint16_t n);
 void debugBinary(uint16_t n);
+void debugHex(uint16_t n);
 
 #endif /* DEBUG_H_ */
