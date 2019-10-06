@@ -38,7 +38,7 @@
 
 
 # MCU name
-MCU = atmega169p
+MCU = atmega169pa
 
 # Main Oscillator Frequency
 # This is only used to define F_OSC in all assembler and c-sources.
@@ -194,7 +194,7 @@ AVRDUDE_WRITE_FLASH = -U flash:w:$(TARGET).hex
 
 # Uncomment the following if you do /not/ wish a verification to be
 # performed after programming the device.
-#AVRDUDE_NO_VERIFY = -V
+AVRDUDE_NO_VERIFY = -V
 
 # Increase verbosity level.  Please use this when submitting bug
 # reports about avrdude. See <http://savannah.nongnu.org/projects/avrdude>
