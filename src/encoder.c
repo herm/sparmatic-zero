@@ -15,11 +15,14 @@
 #include "config.h"
 #include "encoder.h"
 
+#ifdef ENCODER
 volatile int8_t enc_delta; // -128 ... 127
 static volatile int8_t last;
+#endif
 
 void encoderInit(void)
 {
+#ifdef ENCODER
     int8_t new;
 
     ENCODER_DDR &= ~ENCODER_ALL; // configure key port for input
@@ -36,11 +39,12 @@ void encoderInit(void)
         new ^= 1; // convert gray to binary
     last = new; // power on state
     enc_delta = 0;
-
+#endif
 }
 
 void encoderPeriodicScan(void)
 {
+#ifdef ENCODER
     int8_t new, diff;
 
     new = 0;
@@ -53,6 +57,7 @@ void encoderPeriodicScan(void)
         last = new; // store new as next last
         enc_delta += (diff & 2) - 1; // bit 1 = direction (+/-)
     }
+#endif
 }
 
 #if ENCODER == 1
@@ -67,9 +72,7 @@ int8_t encoderRead( void )         // read single step encoders
   sei();
   return val;                   // counts since last call
 }
-#endif
-
-#if ENCODER == 2 
+#elif ENCODER == 2
 // #warning encoder 2
 int8_t encoderRead(void) // read two step encoders
 {
@@ -81,9 +84,7 @@ int8_t encoderRead(void) // read two step encoders
     sei();
     return val >> 1;
 }
-#endif
-
-#if ENCODER == 4
+#elif ENCODER == 4
 #warning encoder 4
 int8_t encoderRead( void )         // read four step encoders
 {

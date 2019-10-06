@@ -6,7 +6,7 @@
 #include "motor.h"
 #include "timer.h"
 #include "adc.h"
-#include "config.h
+#include "config.h"
 
 #define MOTOR_DIR_OUT (MOTOR_DDR |= (1 << MOTOR_PIN_L) | (1 << MOTOR_PIN_R))
 #define MOTOR_DIR_IN (MOTOR_DDR &= ~(1 << MOTOR_PIN_L) | (1 << MOTOR_PIN_R))

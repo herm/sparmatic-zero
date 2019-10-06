@@ -14,8 +14,8 @@
 #define MOTOR_SENSE_PORT_IN PINE
 #define MOTOR_SENSE_LED_PIN PE2
 
-#define ADC_CH_MOTOR (2)
-#define ADC_CH_MOTOR_SENSE (0)
+#define ADC_CH_MOTOR 2
+#define ADC_CH_MOTOR_SENSE 0
 
 /* hardcoded blocking current limit. Currents are in ADC digits.
  * For real current the formular is as follows:
@@ -41,8 +41,31 @@
 #define MOTOR_TARGET_STOP_EARLY 6
 #define MOTOR_TARGET_HYSTERESIS 10
 
-#define ENCODER	2
-// #define ENCODERTEST
+/*************************************************************************
+ *************************** Keys / Encoder ******************************
+ *************************************************************************/
+/* defines the number of steps per dent. #undef this if the device has no encoder. */
+//#define ENCODER	2
+#undef ENCODER
+
+#ifndef ENCODER
+#define KEY_PLUS  PB0
+#define KEY_MINUS PB7
+#else
+#define ENCODER_A PB0
+#define ENCODER_B PB7
+#define ENCODER_DDR  DDRB
+#define ENCODER_PORT PORTB
+#define ENCODER_PIN  PINB
+#endif
+
+#define KEY_CLOCK PB5
+#define KEY_OK    PB6
+#define KEY_MENU  PB4
+
+#define KEY_DDR  DDRB
+#define KEY_PORT PORTB
+#define KEY_PIN  PINB
 
 // #define RADIO	nRF24L01
 // #define RADIO	RFM12
