@@ -199,6 +199,7 @@ void ioInit(void)
  */
 static uint8_t valveInit(void)
 {
+    displayString("OPEN");
     // open valve (retract actuator)
     if (motorFullOpen() != 0) {
         displayString("EI1 ");

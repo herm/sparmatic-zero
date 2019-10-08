@@ -53,7 +53,7 @@ void motorInit(void)
     MOTOR_PORT &= ~((1 << MOTOR_PIN_L) | (1 << MOTOR_PIN_R));
 
     MOTOR_SENSE_DDR |= (1 << MOTOR_SENSE_LED_PIN);
-    PCMSK0 |= (1 << PCINT1);
+    PCMSK0 |= (1 << MOTOR_SENSE_PIN);
 }
 
 static uint16_t getCurrent(void)

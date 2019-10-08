@@ -1,8 +1,6 @@
 #ifndef MOTOR_H_
 #define MOTOR_H_
 
-#define MOTOR_SENSE_PIN PE1
-
 void motorInit(void);
 void motorStepOpen(void);
 void motorStepClose(void);
