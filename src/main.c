@@ -18,11 +18,7 @@
 #include "control.h"
 #include "programming.h"
 #include "menu.h"
-
-#ifdef ENCODER
 #include "encoder.h"
-// #warning "encoder being included"
-#endif
 
 #ifdef BOOTLOADER
 #include "bootloader/bootloader.h"
@@ -48,7 +44,7 @@ static void updateBattery(void)
 }
 
 /// \brief Disable hardware and save data to non-volatile memory on battery removal.
-static void sysShutdown(void)
+void sysShutdown(void)
 {
     // Lcd_Symbol(BAT, 1 );	// TESTING (barely visible)
 
@@ -67,6 +63,7 @@ static void sysShutdown(void)
 
     //lcdOff();
 
+    //TODO: What happens when LCD interrupts are enabled at this point?
     // Disable LCD
     // Wait until a new frame is started.
     while (!(LCDCRA & (1 << LCDIF)))
@@ -83,6 +80,7 @@ static void sysShutdown(void)
     // shut down everything else
     PRR = (1 << PRLCD) | (1 << PRTIM1) | (1 << PRSPI) | (1 << PRUSART0) | (1 << PRADC);
 
+    //TODO: Make sure no pins are floating
     DDRA = 0;
     PORTA = 0;
 
@@ -95,15 +93,15 @@ static void sysShutdown(void)
     DDRG = 0;
     PORTG = 0;
 
-    // write data to EEPROM
+    // TODO: write data to EEPROM
     // time
     // temperature set-point
     // other settings should be saved when edited
 }
 
 /// \brief Occurs at each new LCD frame , ~128 ms.
-/// 
-/// 
+//TODO: Why are these things which are unreleated to the LCD handled in the LCD interrupt?
+//TODO: Is it really 128ms? Datasheet recommends frame times of ~2-3ms.
 ISR(LCD_vect)
 {
     static uint8_t cnt = 0;
@@ -125,15 +123,19 @@ ISR(LCD_vect)
     }
 }
 
-/// \brief Emergency wakeup on power loss, motor step counter, SPI IRQ.
-/// 
-/// Triggers on both edges, so state change needs to be tracked in software.
+/* External interrupt handler.
+ * Functions:
+ * - Emergency wakeup on power loss
+ * - Motor step counter
+ * - Radio IRQ
+ * Triggers on both edges, so state change needs to be tracked in software.
+ */
 #define PCINT0_PORTIN PINE
 ISR(PCINT0_vect)
 {
 #ifdef RADIO
 	static unsigned char lastState = (1 << IRQ_PIN);	// init to defaults
-	#else
+#else
     static unsigned char lastState = 0; // init to defaults
 #endif
 
@@ -143,7 +145,7 @@ ISR(PCINT0_vect)
 
     // save data when battery removed
     if (newState & (1 << POWERLOSS_PIN)) {
-        sysShutdown();
+        //TODO: sysShutdown();
     }
 
     // motor step
@@ -157,15 +159,15 @@ ISR(PCINT0_vect)
 	{
 		nRF24L01_IRQ();
 	}
-	#endif
+#endif
 }
 
-
+/* Put system into low power mode. */
 static void sysSleep(void)
 {
-    OCR2A = 0;
+    OCR2A = 0; //TODO
     ADCSRA &= ~(1 << ADEN); // Disable ADC
-    displaySymbols(LCD_BATTERY, LCD_BATTERY);
+    displaySymbols(LCD_BATTERY, LCD_BATTERY); //TODO: Why?
     while (ASSR & (1 << OCR2UB))
         /* wait at least one asynchronous clock cycle for interrupt logic to reset */
         ;
@@ -173,6 +175,7 @@ static void sysSleep(void)
     displaySymbols(0, LCD_BATTERY);
 }
 
+//TODO: Power loss pin => config.h
 void pwrInit(void)
 {
 #if DEBUG_ENABLED
@@ -182,7 +185,7 @@ void pwrInit(void)
 #endif
     set_sleep_mode(SLEEP_MODE_PWR_SAVE);
     PCMSK0 |= (1 << PCINT0); /* emergency power loss IRQ */
-    DDRE &= ~(1 << PE0);
+    POWERLOSS_DDR &= ~(1 << POWERLOSS_PIN);
     EIMSK |= (1 << PCIE0);
 }
 
@@ -191,22 +194,20 @@ void ioInit(void)
     DIDR0 = 0xFF; /* Disable digital inputs on Port F */
 }
 
-/// \brief Valve initialisation UI.
-/// 
-/// returns 1 on error
+/* Valve initialisation UI.
+ * returns 1 on error
+ */
 static uint8_t valveInit(void)
 {
     // open valve (retract actuator)
-    if (motorFullOpen()) {
+    if (motorFullOpen() != 0) {
         displayString("EI1 ");
         return 1;
     }
 
     // wait for user input
     displayString("INST");
-    while (!get_key_press(1 << KEY_OK))
-    {
-//        debugBinary(PINB);
+    while (!get_key_press(1 << KEY_OK)) {
     }
 
     // close valve (protract actuator)
@@ -223,6 +224,7 @@ int main(void)
 {
     _delay_ms(50);
     debugInit();
+    debugString("Start\r\n");
     timerInit();
     pwrInit();
     ioInit();
@@ -235,8 +237,9 @@ int main(void)
     ntcInit();
 #ifdef RADIO
 	funkInit();
-	#endif
+#endif
     sei();
+    debugString("Init done\r\n");
 #if 1
     if (valveInit()) {
         while (1) // we do not want to operate with an incorrect setup

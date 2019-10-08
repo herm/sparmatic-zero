@@ -7,9 +7,6 @@
 #define SLEEP_POWERSAVE ((1 << SM1) | (1 << SM0))
 #define SLEEP SLEEP_POWERSAVE
 
-#define POWERLOSS_PORTIN PINE
-#define POWERLOSS_PIN PE0
-
 /* keypad changes temperature by this (1/100 degrees) */
 #define MANUAL_TEMPERATURE_STEP		(50)
 
