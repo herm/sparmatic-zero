@@ -159,6 +159,10 @@ void displayAsciiDigit(char c, uint8_t pos)
 {
     if (pos >= NUM_DIGITS)
         return;
+    if (c == ' ') {
+        displayDigit(0, pos);
+        return;
+    }
     uint8_t fontIndex = c - FONT_ASCII_OFFSET;
     uint16_t segments = pgm_read_word(&Font[fontIndex]);
     displayDigit(segments, pos);
