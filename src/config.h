@@ -79,7 +79,7 @@
  *************************************************************************/
 #define POWERLOSS_PORTIN PINE
 #define POWERLOSS_DDR DDRE
-#define POWERLOSS_PIN PE0  //TODO: Is this the right pin?
+#define POWERLOSS_PIN PE5
 
 /*************************************************************************
  *************************** Keys / Encoder ******************************

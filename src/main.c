@@ -184,7 +184,7 @@ void pwrInit(void)
     PRR = (1 << PRTIM1) | (1 << PRUSART0); // disable some hardware
 #endif
     set_sleep_mode(SLEEP_MODE_PWR_SAVE);
-    PCMSK0 |= (1 << PCINT0); /* emergency power loss IRQ */
+    PCMSK0 |= (1 << POWERLOSS_PIN); /* emergency power loss IRQ */
     POWERLOSS_DDR &= ~(1 << POWERLOSS_PIN);
     EIMSK |= (1 << PCIE0);
 }
