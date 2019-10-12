@@ -112,7 +112,7 @@ CFLAGS += $(CSTANDARD)
 CFLAGS += -DF_OSC=$(F_OSC)
 CFLAGS += -DF_CPU=$(F_OSC)
 CFLAGS += -fno-inline-small-functions
-CFLAGS += -Werror
+CFLAGS += -Werror -Wno-error=unused-function
 
 
 # Assembler flags.
