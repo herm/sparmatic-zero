@@ -31,7 +31,8 @@
 #endif
 
 uint16_t BatteryMV;
-
+/* TODO: This returns completely wrong values. The calculation seems to be OK, but the ADC are not.
+ * Using the bandgap voltage as a reference is was measured at 1.099V at the Vref pin. */
 static void updateBattery(void)
 {
     uint16_t adc = getAdc(ADC_CH_REF);
@@ -44,7 +45,7 @@ static void updateBattery(void)
 }
 
 /// \brief Disable hardware and save data to non-volatile memory on battery removal.
-void sysShutdown(void)
+static void sysShutdown(void)
 {
     // Lcd_Symbol(BAT, 1 );	// TESTING (barely visible)
 
@@ -241,7 +242,7 @@ int main(void)
 #endif
     sei();
     debugString("Init done\r\n");
-#if 1
+#if 0
     if (valveInit()) {
         while (1) // we do not want to operate with an incorrect setup
             sysSleep();

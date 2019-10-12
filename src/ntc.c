@@ -1,15 +1,10 @@
 #include <avr/io.h>
 #include <avr/pgmspace.h>
 #include "adc.h"
-
-#define NTC_PORT PORTF
-#define NTC_DDR DDRF
-#define NTC_PIN (PF3)
-
-#define ADC_CH_NTC (1)
+#include "config.h"
+#include "debug.h"
 
 /* all resistances in 10 Ohms */
-
 #define VOLTAGE_DIVIDER_RES 1200000000UL
 #define NTC_START_DEGREE 0
 #define NTC_DEGREE_STEPS 5
@@ -36,8 +31,8 @@ static const uint16_t NtcRes[] PROGMEM = { 34090, //  0°C
         684, // 95°C
         0 };
 
-int16_t Temperature;
-int16_t NTCOffset = 0;
+int16_t Temperature; /* in 0.01°C */
+int16_t NTCOffset = 0; /* in 0.01°C */
 
 void ntcInit(void)
 {
@@ -53,7 +48,8 @@ static uint16_t getNtcAdc(void)
     return ntc;
 }
 
-/** returns temperature * 100 */
+/** returns temperature in 0.01°C.
+ * TODO: Measured voltage is correct, calculated temperature a bit to high. */
 void updateNtcTemperature(void)
 {
     uint16_t ntcVoltage = getNtcAdc();
@@ -66,6 +62,5 @@ void updateNtcTemperature(void)
 
     temperature = NTC_START_DEGREE + i * NTC_DEGREE_STEPS * 100UL
             - (((ntcRes - ntcResTbl) * NTC_DEGREE_STEPS * 100UL) / (pgm_read_word(&NtcRes[i-1]) - ntcResTbl));
-
     Temperature = temperature - NTCOffset;
 }

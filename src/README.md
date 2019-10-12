@@ -4,3 +4,8 @@ The LCD interrupt calls the key handler (`keyPeriodicScan`) which sets flags for
 
 # Power loss
 A interrupt is raised (`PCINT0_vect`) when power is lost. All system functions are disabled and the current date & time are written to the EEPROM (`sysShutdown`).
+
+# ADC channels
+* 1: NTC
+* 2: Motor
+* 30: Bandgap 1.1V

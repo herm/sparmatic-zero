@@ -22,7 +22,6 @@
 #define MOTOR_SENSE_PIN PE3
 
 #define ADC_CH_MOTOR 2
-#define ADC_CH_MOTOR_SENSE 0
 
 /* hardcoded blocking current limit. Currents are in ADC digits.
  * For real current the formular is as follows:
@@ -82,8 +81,13 @@
 #define POWERLOSS_PIN PE5
 
 /*************************************************************************
- *************************** Keys / Encoder ******************************
+ ******************************* NTC *************************************
  *************************************************************************/
+#define NTC_PORT PORTF
+#define NTC_DDR DDRF
+#define NTC_PIN PF3
+#define ADC_CH_NTC 1
+
 
 // #define RADIO	nRF24L01
 // #define RADIO	RFM12
