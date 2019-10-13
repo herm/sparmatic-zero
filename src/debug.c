@@ -45,6 +45,7 @@ void debugHex(uint16_t n)
     debugString("\r\n");
 }
 
+#ifdef DEBUG_IRQS
 #include <avr/interrupt.h>
 ISR(BADISR_vect)
 {
@@ -139,3 +140,4 @@ ISR( SPM_READY_vect )
 //{
 //    debugString(" LCD_vect\r\n");
 //}
+#endif
