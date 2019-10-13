@@ -9,3 +9,9 @@ A interrupt is raised (`PCINT0_vect`) when power is lost. All system functions a
 * 1: NTC
 * 2: Motor
 * 30: Bandgap 1.1V
+
+# Timers
+* LCD frame interrupt (64Hz): Used for button and motor handling
+* Timer 0 (1kHz): Overflow (256ms): Timeout for button presses, OCR0: Used for enableTimeout()
+* Timer 1: unused
+* Timer 2 (32Hz): Overflow(8s): RTC, OCR2A: Unknown function in system sleep

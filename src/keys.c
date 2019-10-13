@@ -19,10 +19,6 @@
 #endif
 #include "keys.h"
 
-#ifndef F_CPU
-#error F_CPU not defined
-#endif
-
 volatile uint8_t key_state; // debounced and inverted key state:
 // bit = 1: key pressed
 volatile uint8_t key_press; // key press detect
