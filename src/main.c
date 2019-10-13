@@ -45,6 +45,7 @@ static void updateBattery(void)
 }
 
 /// \brief Disable hardware and save data to non-volatile memory on battery removal.
+//TODO: Do not disable pull ups!
 static void sysShutdown(void)
 {
     // Lcd_Symbol(BAT, 1 );	// TESTING (barely visible)
@@ -100,9 +101,8 @@ static void sysShutdown(void)
     // other settings should be saved when edited
 }
 
-/// \brief Occurs at each new LCD frame , ~128 ms.
+/// \brief Occurs at each new LCD frame or every second LCD frame in low power mode => 64Hz.
 //TODO: Why are these things which are unreleated to the LCD handled in the LCD interrupt?
-//TODO: Is it really 128ms? Datasheet recommends frame times of ~2-3ms.
 ISR(LCD_vect)
 {
     static uint8_t cnt = 0;
@@ -122,6 +122,7 @@ ISR(LCD_vect)
         cnt = 0;
         LCDCRA &= ~(1 << LCDIE); /* disable LCD Interrupt when keys are handled */
     }
+    timer++;
 }
 
 /* External interrupt handler.
@@ -176,7 +177,6 @@ static void sysSleep(void)
     displaySymbols(0, LCD_BATTERY);
 }
 
-//TODO: Power loss pin => config.h
 void pwrInit(void)
 {
 #if DEBUG_ENABLED
@@ -263,7 +263,6 @@ int main(void)
 #ifndef DISPLAYDEBUG
         updateNtcTemperature();
         updateBattery();
-
         menu();
 
 #ifdef RADIO

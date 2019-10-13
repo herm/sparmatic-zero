@@ -213,7 +213,7 @@ void displayNumber(int16_t num, int8_t width)
 
 void lcdInit(void)
 {
-    LCDCRB = (1 << LCDCS) | (0 << LCD2B) | (1 << LCDMUX1) | (1 << LCDMUX0) | (1 << LCDPM2) | (1 << LCDPM1) | (1 << LCDPM0);
+    LCDCRB = (1 << LCDCS) | (1 << LCDMUX1) | (1 << LCDMUX0) | (1 << LCDPM2) | (1 << LCDPM1) | (1 << LCDPM0);
     /*
      (1<<LCDCS)                            // Das LCD wird im asynchronen Modus (LCDCS-Bit=1)
      mit der Frequenz des Quarzes TOSC1 = 32.768Hz als LCD Clock betrieben.
@@ -222,15 +222,18 @@ void lcdInit(void)
      |(1<<LCDPM2)|(1<<LCDPM1)|(1<<LCDPM0); // SEG0:24
      */
 
-    LCDFRR = (0 << LCDPS2) | (0 << LCDPS1) | (0 << LCDPS0) | (0 << LCDCD2) | (0 << LCDCD1) | (1 << LCDCD0);
+    LCDFRR = (1 << LCDCD0);
     /*
      (0<<LCDPS2)|(0<<LCDPS1)|(0<<LCDPS0)    // N = 16
      |(0<<LCDCD2)|(0<<LCDCD1)|(1<<LCDCD0);  // D = 2
-     // ergo f(frame) = 128Hz
-     eventuell D=1, N=64 (LCDCD0 = 0) LCDPS0=1 für 64 Hz, ausprobieren
+     K = 8 for duty = 1/4, 1/2, static
+     f_frame = f_clk / (K * N * D)
+             = 32kHz / (8 * 16 * 2) = 128 Hz
+
      */
 
-    LCDCCR = (1 << LCDDC2) | (0 << LCDDC1) | (0 << LCDDC0) | (/*config.lcd_contrast*/10 << LCDCC0);
+    //TODO: Find optimum settings for low power
+    LCDCCR = (1 << LCDDC2) | (0 << LCDDC1) | (0 << LCDDC0) | (/* TODO config.lcd_contrast*/10 << LCDCC0);
     /*
      (1<<LCDDC2)|(0<<LCDDC1)|(0<<LCDDC0)   // 575 µs
      // 3,1V
