@@ -6,9 +6,10 @@
 
 /* all resistances in 10 Ohms */
 #define VOLTAGE_DIVIDER_RES 1200000000UL
-#define NTC_START_DEGREE 0
-#define NTC_DEGREE_STEPS 5
+#define NTC_START_DEGREE 0 /* in 0.01°C. Temperature of first value in NtcRes. */
+#define NTC_DEGREE_STEPS 500 /* in 0.01K. Step size between entries in NtcRes. */
 
+/*TODO: Having 2 variables named NtcRes and ntcRes is a very bad idea. */
 static const uint16_t NtcRes[] PROGMEM = { 34090, //  0°C
         26310, //  5°C
         20440, // 10°C
@@ -52,15 +53,16 @@ static uint16_t getNtcAdc(void)
  * TODO: Measured voltage is correct, calculated temperature a bit to high. */
 void updateNtcTemperature(void)
 {
-    uint16_t ntcVoltage = getNtcAdc();
-    uint16_t ntcRes = VOLTAGE_DIVIDER_RES / (102300000UL / ntcVoltage - 100000);
+    uint16_t ntcVoltage = getNtcAdc(); /* TODO: This is not voltage, but a ratio */
+    uint16_t ntcRes = VOLTAGE_DIVIDER_RES / (102300000UL / ntcVoltage - 100000); /* TODO: Document calculation. */
     uint16_t ntcResTbl;
     uint8_t i = 0;
     int16_t temperature;
     while ((ntcResTbl = pgm_read_word(&NtcRes[i])) > ntcRes)
         ++i;
 
-    temperature = NTC_START_DEGREE + i * NTC_DEGREE_STEPS * 100UL
-            - (((ntcRes - ntcResTbl) * NTC_DEGREE_STEPS * 100UL) / (pgm_read_word(&NtcRes[i-1]) - ntcResTbl));
+    /* Linear interpolation between steps in the table. */
+    temperature = NTC_START_DEGREE + i * (uint32_t)NTC_DEGREE_STEPS
+            - (((ntcRes - ntcResTbl) * (uint32_t)NTC_DEGREE_STEPS) / (pgm_read_word(&NtcRes[i-1]) - ntcResTbl));
     Temperature = temperature - NTCOffset;
 }
