@@ -28,7 +28,7 @@ void sysSleep(void)
 {
     OCR2A = 0; //TODO
     ADCSRA &= ~(1 << ADEN); // Disable ADC
-    displaySymbols(LCD_BATTERY, LCD_BATTERY); //TODO: Why?
+    displaySymbols(LCD_BATTERY, LCD_BATTERY); //TODO: For debugging only
     while (ASSR & (1 << OCR2UB))
         /* wait at least one asynchronous clock cycle for interrupt logic to reset */
         ;
@@ -55,21 +55,7 @@ void sysShutdown(void)
     DDRF = 0;
     PORTF = 0;
 
-    //lcdOff();
-
-    //TODO: What happens when LCD interrupts are enabled at this point?
-    // Disable LCD
-    // Wait until a new frame is started.
-    while (!(LCDCRA & (1 << LCDIF)))
-        ;
-    // Set LCD Blanking and clear interrupt flag
-    // by writing a logical one to the flag.
-    LCDCRA = (1 << LCDEN) | (1 << LCDIF) | (1 << LCDBL);
-    // Wait until LCD Blanking is effective.
-    while (!(LCDCRA & (1 << LCDIF)))
-        ;
-    // Disable LCD
-    LCDCRA = (0 << LCDEN);
+    lcdOff();
 
     // shut down everything else
     PRR = (1 << PRLCD) | (1 << PRTIM1) | (1 << PRSPI) | (1 << PRUSART0) | (1 << PRADC);

@@ -11,52 +11,51 @@
  */
 #define FONT_ASCII_OFFSET '-'
 static const uint16_t Font[] PROGMEM = { 0x00C0, // -
-        0, // .
-        0, // /
-        0x003F, //0
-        0x0406, //1
-        0x00DB, //2
-        0x008F, //3
-        0x00E6, //4
-        0x00ED, //5
-        0x00FD, //6
-        0x1401, //7
-        0x00FF, //8
-        0x00EF, //9
-        0x1200, //:
-        0x0C00, // //
+        0x0000, // .
+        0x0000, // /
+        0x003F, // 0
+        0x0406, // 1
+        0x00DB, // 2
+        0x008F, // 3
+        0x00E6, // 4
+        0x00ED, // 5
+        0x00FD, // 6
+        0x1401, // 7
+        0x00FF, // 8
+        0x00EF, // 9
+        0x1200, // :
+        0x0C00, // /
         0x2400, // <
-        0x00C1, //=
-        0x0900, //>
-        0x1421, //?
-        0x2D3F, //@
-        0x00F7, //A
-        0x128F, //B
-        0x0039, //C
-        0x120F, //D
-        0x00F9, //E a f e d g1 g2
-        0x00F1, //F a f e g1 g2
-        0x00BD, //G a f e d c g2
-        0x00F6, //H f e g1 g2 b c
-        0x1209, // I a i l d
-        0x001E, // J b c d e
-        0x2470, // K f e g1 j m
-        0x0038, // L f e d
-        0x0536, // M f e h j b c
-        0x2136, // N f e h m c b
-        0x003F, // O a f e d b c
-        0x00F3, // P f e a b g1 g2
-        0x203F, // Q a f e d b c m
-        0x20F3, // R a f e b g1 g2 m
-        0x018D, // S a h g2 c d
-        0x1201, // T i l a
-        0x003E, // U f e d b c
-        0x0C30, // V f e k j
-        0x2836, // W f e k m c b
-        0x2D00, // X h m k j
-        0x1500, // Y h j l
-        0x0C09 // Z a j k d
-
+        0x00C1, // =
+        0x0900, // >
+        0x1421, // ?
+        0x2D3F, // @
+        0x00F7, // A
+        0x128F, // B
+        0x0039, // C
+        0x120F, // D
+        0x00F9, // E
+        0x00F1, // F
+        0x00BD, // G
+        0x00F6, // H
+        0x1209, // I
+        0x001E, // J
+        0x2470, // K
+        0x0038, // L
+        0x0536, // M
+        0x2136, // N
+        0x003F, // O
+        0x00F3, // P
+        0x203F, // Q
+        0x20F3, // R
+        0x018D, // S
+        0x1201, // T
+        0x003E, // U
+        0x0C30, // V
+        0x2836, // W
+        0x2D00, // X
+        0x1500, // Y
+        0x0C09, // Z
         };
 
 /*
@@ -64,9 +63,7 @@ static const uint16_t Font[] PROGMEM = { 0x00C0, // -
  * taken from TravelRec.
  */
 #define SEGMENTS_PER_DIGIT 14
-static const uint8_t Segments[] PROGMEM = {
-
-126, 124, 44, 5, 7, 127, 47, 85, 87, 86, 125, 6, 46, 45, //left Digit
+static const uint8_t Segments[] PROGMEM = { 126, 124, 44, 5, 7, 127, 47, 85, 87, 86, 125, 6, 46, 45, //left Digit
         123, 121, 1, 2, 4, 84, 43, 81, 83, 82, 122, 3, 42, 41, //middle left Digit
         137, 139, 59, 18, 16, 136, 56, 98, 96, 97, 138, 17, 57, 58, //middle right Digit
         140, 142, 22, 21, 19, 99, 60, 102, 100, 101, 141, 20, 61, 62 //right Digit
@@ -228,7 +225,7 @@ void lcdInit(void)
      |(0<<LCDCD2)|(0<<LCDCD1)|(1<<LCDCD0);  // D = 2
      K = 8 for duty = 1/4, 1/2, static
      f_frame = f_clk / (K * N * D)
-             = 32kHz / (8 * 16 * 2) = 128 Hz
+     = 32kHz / (8 * 16 * 2) = 128 Hz
 
      */
 
@@ -251,5 +248,17 @@ void lcdInit(void)
 
 void lcdOff(void)
 {
-    LCDCRA |= (1 << LCDBL);
+    //TODO: What happens when LCD interrupts are enabled at this point?
+    // Disable LCD
+    // Wait until a new frame is started. //TODO: Is this wait required?
+    while (!(LCDCRA & (1 << LCDIF)))
+        ;
+    // Set LCD Blanking and clear interrupt flag
+    // by writing a logical one to the flag.
+    LCDCRA = (1 << LCDEN) | (1 << LCDIF) | (1 << LCDBL);
+    // Wait until LCD Blanking is effective.
+    while (!(LCDCRA & (1 << LCDIF)))
+        ;
+    // Disable LCD
+    LCDCRA = 0;
 }
