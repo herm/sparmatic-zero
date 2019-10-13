@@ -2,14 +2,6 @@
 #define TIMER_H_
 
 typedef void (*TimerCallback)(void);
-
-/*
- * 1/32th second per step.
- * TODO this wont work within one timer step after wake up from sleep!
- * We will get old value before going to sleep!
- */
-#define timerGet() (TCNT2)
-
 extern volatile uint8_t Timer0H;
 
 /* long system timer, incremented every 8 seconds. Starts at 0 on every system reset. */
@@ -24,23 +16,24 @@ typedef struct
 } TIME;
 
 void timerInit(void);
+
 void enableTimeout(TimerCallback cbk, uint8_t timeout);
 void setTimeout(uint8_t timeout);
 void disableTimeout(void);
+
 TIME getTime(void);
 
-#define addToTime(time, hours, minutes) \
-{ \
-	uint16_t tempMinute = time.minute + minutes; \
-	time.minute = tempMinute % 60; \
-	time.hour += tempMinute/60 + hours; \
-	time.weekday += time.hour / 24; \
-	time.hour %= 24; \
-}
+void addToTime(TIME *time, uint8_t hours, uint8_t minutes);
 
-#define compareTime(a, b) \
-		((a.weekday < b.weekday) ? -1 : (a.weekday > b.weekday ? 1 : \
-				a.hour < b.hour ? -1 : (a.hour > b.hour ? 1 : \
-						a.minute < b.minute ? -1 : (a.minute == b.minute ? 0 : 1))))
+static inline uint8_t compareTime(TIME *a, TIME *b)
+{
+    if (a->weekday < b->weekday) return -1;
+    if (a->weekday > b->weekday) return 1;
+    if (a->hour < b->hour) return -1;
+    if (a->hour > b->hour) return 1;
+    if (a->minute < b->minute) return -1;
+    if (a->minute > b->minute) return 1;
+    return 0;
+}
 
 #endif /* TIMER_H_ */

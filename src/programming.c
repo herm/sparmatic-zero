@@ -66,7 +66,7 @@ void applyProgram(void)
     TIME time = getTime();
 
     /* crappy weekday-overflow handling... */
-    if (dismissUntil.weekday != 7 && (compareTime(time, dismissUntil) <= 0 || (time.weekday > 3 && dismissUntil.weekday < 3))) {
+    if (dismissUntil.weekday != 7 && (compareTime(&time, &dismissUntil) <= 0 || (time.weekday > 3 && dismissUntil.weekday < 3))) {
         displaySymbols(LCD_MANU, LCD_MANU | LCD_AUTO);
     } else {
         uint8_t temperatureIndex;
@@ -89,6 +89,6 @@ void setTemperature(uint8_t num, uint16_t temperature)
 void dismissProgramChanges(uint16_t minutes)
 {
     TIME time = getTime();
-    addToTime(time, 0, minutes);
+    addToTime(&time, 0, minutes);
     dismissUntil = time;
 }

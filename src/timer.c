@@ -2,13 +2,15 @@
 #include <avr/interrupt.h>
 #include "timer.h"
 
+// Timer 0
 volatile uint8_t Timer0H;
-volatile uint32_t SystemTime;
-
-static volatile TIME Time;
-
 static TimerCallback TimeoutCallback;
 
+// Timer 2
+volatile uint32_t SystemTime; //monotonic time in seconds
+static volatile TIME Time;
+
+// Timer 0
 ISR(TIMER0_OVF_vect)
 {
     ++Timer0H;
@@ -21,12 +23,33 @@ ISR(TIMER0_COMP_vect)
         TimeoutCallback = 0;
         TIMSK0 &= ~(1 << OCIE0A);
     }
-
 }
 
+void enableTimeout(TimerCallback cbk, uint8_t timeout)
+{
+    TimeoutCallback = cbk;
+    OCR0A = TCNT0 + timeout;
+    TIFR0 |= (1 << OCF0A);
+    TIMSK0 |= (1 << OCIE0A);
+}
+
+void setTimeout(uint8_t timeout)
+{
+    OCR0A = TCNT0 + timeout;
+}
+
+void disableTimeout()
+{
+    TIMSK0 &= ~(1 << OCIE1A);
+    TimeoutCallback = 0;
+}
+
+// Timer 2
 /* used for waking up the device periodically */
 ISR(TIMER2_OVF_vect)
 {
+    /* TODO: Check the assembly code of this function. Copying "Time" twice seems to be inefficient. */
+    /* TODO: Use full date (with day and month) to allow programming holidays. */
     TIME tTime = Time;
 
     tTime.second += 8;
@@ -50,6 +73,16 @@ ISR(TIMER2_OVF_vect)
     Time = tTime;
 }
 
+TIME getTime(void)
+{
+    TIME res;
+    cli();
+    res = Time;
+    sei();
+    return res;
+}
+
+// Both timers
 void timerInit(void)
 {
     ASSR |= (1 << AS2);
@@ -66,30 +99,12 @@ void timerInit(void)
     TIMSK0 = (1 << TOIE0);
 }
 
-void enableTimeout(TimerCallback cbk, uint8_t timeout)
+// Utility functions
+void addToTime(TIME *time, uint8_t hours, uint8_t minutes)
 {
-    TimeoutCallback = cbk;
-    OCR0A = TCNT0 + timeout;
-    TIFR0 |= (1 << OCF0A);
-    TIMSK0 |= (1 << OCIE0A);
-}
-
-void setTimeout(uint8_t timeout)
-{
-    OCR0A = TCNT0 + timeout;
-}
-
-void disableTimeout()
-{
-    TIMSK0 &= ~(1 << OCIE1A);
-    TimeoutCallback = 0;
-}
-
-TIME getTime(void)
-{
-    TIME res;
-    cli();
-    res = Time;
-    sei();
-    return res;
+    uint16_t tempMinute = time->minute + minutes;
+    time->minute = tempMinute % 60;
+    time->hour += tempMinute / 60 + hours;
+    time->weekday += time->hour / 24;
+    time->hour %= 24;
 }
