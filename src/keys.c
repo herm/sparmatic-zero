@@ -59,7 +59,6 @@ uint8_t get_key_press(uint8_t key_mask)
     return key_mask;
 }
 
-
 ///////////////////////////////////////////////////////////////////
 //
 // check if a key has been pressed long enough such that the
@@ -87,14 +86,12 @@ uint8_t get_key_short(uint8_t key_mask)
     return tmp;
 }
 
-
 ///////////////////////////////////////////////////////////////////
 //
 uint8_t get_key_long(uint8_t key_mask)
 {
     return get_key_press(get_key_rpt(key_mask));
 }
-
 
 /*
  * get increment/decrement keys.
@@ -103,7 +100,6 @@ uint8_t get_key_long(uint8_t key_mask)
 int8_t get_key_increment(void)
 {
 #ifdef ENCODER
-// 	#warning encoder gets key increment
     int8_t keys = encoderRead();
     // limit
     if (keys > 0)
@@ -111,13 +107,12 @@ int8_t get_key_increment(void)
     if (keys < 0)
         return -1;
 #else
-	uint8_t keys = get_key_press((1 << KEY_MINUS) | (1 << KEY_PLUS));
-	if(keys & (1 << KEY_PLUS))
-		return 1;
-	if(keys & (1 << KEY_MINUS))
-		return -1;
-	#endif
-
+    uint8_t keys = get_key_press((1 << KEY_MINUS) | (1 << KEY_PLUS));
+    if (keys & (1 << KEY_PLUS))
+        return 1;
+    if (keys & (1 << KEY_MINUS))
+        return -1;
+#endif
     return 0;
 }
 
@@ -130,7 +125,6 @@ void keyInit(void)
     // Enable interrupt as a wake-up source
     EIMSK |= (1 << PCIE1); //PC-INT 8..15
     PCMSK1 |= KEY_ALL; // Enable all switches PC-INT
-
 }
 
 ISR(PCINT1_vect)

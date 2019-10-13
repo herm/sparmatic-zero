@@ -13,8 +13,8 @@
 #define KEYS_H_
 
 #define REPEAT_MASK     KEY_ALL       // repeat: key1, key2
-#define REPEAT_START    30                        // after N scans
-#define REPEAT_NEXT     9                        // every M scans
+#define REPEAT_START    30            // after N scans
+#define REPEAT_NEXT     9             // every M scans
 
 #ifdef ENCODER
 #define KEY_ALL (                                     (1 << KEY_CLOCK) | (1 << KEY_MENU) | (1 << KEY_OK))

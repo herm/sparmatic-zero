@@ -15,6 +15,10 @@
 #include "config.h"
 #include "encoder.h"
 
+#define ENCODER_ALL ((1<<ENCODER_A)|(1<<ENCODER_B))
+#define PHASE_A     (ENCODER_PIN & 1<<ENCODER_A)
+#define PHASE_B     (ENCODER_PIN & 1<<ENCODER_B)
+
 #ifdef ENCODER
 volatile int8_t enc_delta; // -128 ... 127
 static volatile int8_t last;
