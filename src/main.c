@@ -1,9 +1,6 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
-#include <avr/sleep.h>
-#include <avr/pgmspace.h>
 #include <util/delay.h>
-#include <avr/wdt.h>
 
 #include "config.h"
 #include "main.h"
@@ -19,10 +16,7 @@
 #include "programming.h"
 #include "menu.h"
 #include "encoder.h"
-
-#ifdef BOOTLOADER
-#include "bootloader/bootloader.h"
-#endif
+#include "power.h"
 
 #ifdef RADIO
 #include "nRF24L01.h"
@@ -30,79 +24,8 @@
 #include "radio.h"
 #endif
 
-uint16_t BatteryMV;
-/* TODO: This returns completely wrong values. The calculation seems to be OK, but the ADC are not.
- * Using the bandgap voltage as a reference is was measured at 1.099V at the Vref pin. */
-static void updateBattery(void)
-{
-    uint16_t adc = getAdc(ADC_CH_REF);
-    /* Uin = scale/fullscale * Uref
-     * -> here: Uref = ??; Uin = const
-     * Uref = Uin/scale*fullscale
-     * calculate at 32 bit
-     */
-    BatteryMV = (ADC_REF_MV * 1024UL / adc);
-}
-
-/// \brief Disable hardware and save data to non-volatile memory on battery removal.
-//TODO: Do not disable pull ups!
-static void sysShutdown(void)
-{
-    // Lcd_Symbol(BAT, 1 );	// TESTING (barely visible)
-
-    // ADC
-    ADCSRA = 0;
-
-    // A, C, D, G: LCD
-    DDRB = 0;
-    PORTB = 0;
-
-    DDRE = 0;
-    PORTE = 0;
-
-    DDRF = 0;
-    PORTF = 0;
-
-    //lcdOff();
-
-    //TODO: What happens when LCD interrupts are enabled at this point?
-    // Disable LCD
-    // Wait until a new frame is started.
-    while (!(LCDCRA & (1 << LCDIF)))
-        ;
-    // Set LCD Blanking and clear interrupt flag
-    // by writing a logical one to the flag.
-    LCDCRA = (1 << LCDEN) | (1 << LCDIF) | (1 << LCDBL);
-    // Wait until LCD Blanking is effective.
-    while (!(LCDCRA & (1 << LCDIF)))
-        ;
-    // Disable LCD
-    LCDCRA = (0 << LCDEN);
-
-    // shut down everything else
-    PRR = (1 << PRLCD) | (1 << PRTIM1) | (1 << PRSPI) | (1 << PRUSART0) | (1 << PRADC);
-
-    //TODO: Make sure no pins are floating
-    DDRA = 0;
-    PORTA = 0;
-
-    DDRC = 0;
-    PORTC = 0;
-
-    DDRD = 0;
-    PORTD = 0;
-
-    DDRG = 0;
-    PORTG = 0;
-
-    // TODO: write data to EEPROM
-    // time
-    // temperature set-point
-    // other settings should be saved when edited
-}
-
 /// \brief Occurs at each new LCD frame or every second LCD frame in low power mode => 64Hz.
-//TODO: Why are these things which are unreleated to the LCD handled in the LCD interrupt?
+//TODO: Why are these things which are unrelated to the LCD handled in the LCD interrupt?
 ISR(LCD_vect)
 {
     static uint8_t cnt = 0;
@@ -122,7 +45,6 @@ ISR(LCD_vect)
         cnt = 0;
         LCDCRA &= ~(1 << LCDIE); /* disable LCD Interrupt when keys are handled */
     }
-    timer++;
 }
 
 /* External interrupt handler.
@@ -147,7 +69,7 @@ ISR(PCINT0_vect)
 
     // save data when battery removed
     if (newState & (1 << POWERLOSS_PIN)) {
-        //TODO: sysShutdown();
+        sysShutdown();
     }
 
     // motor step
@@ -164,38 +86,13 @@ ISR(PCINT0_vect)
 #endif
 }
 
-/* Put system into low power mode. */
-static void sysSleep(void)
-{
-    OCR2A = 0; //TODO
-    ADCSRA &= ~(1 << ADEN); // Disable ADC
-    displaySymbols(LCD_BATTERY, LCD_BATTERY); //TODO: Why?
-    while (ASSR & (1 << OCR2UB))
-        /* wait at least one asynchronous clock cycle for interrupt logic to reset */
-        ;
-    sleep_mode();
-    displaySymbols(0, LCD_BATTERY);
-}
-
-void pwrInit(void)
-{
-#if DEBUG_ENABLED
-    PRR = (1 << PRTIM1); // disable some hardware
-#else
-    PRR = (1 << PRTIM1) | (1 << PRUSART0); // disable some hardware
-#endif
-    set_sleep_mode(SLEEP_MODE_PWR_SAVE);
-    PCMSK0 |= (1 << POWERLOSS_PIN); /* emergency power loss IRQ */
-    POWERLOSS_DDR &= ~(1 << POWERLOSS_PIN);
-    EIMSK |= (1 << PCIE0);
-}
 
 void ioInit(void)
 {
     DIDR0 = 0xFF; /* Disable digital inputs on Port F */
 }
 
-/* Valve initialisation UI.
+/* Valve initialization UI.
  * returns 1 on error
  */
 static uint8_t valveInit(void)

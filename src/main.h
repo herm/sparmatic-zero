@@ -1,9 +1,6 @@
 #ifndef MAIN_H_
 #define MAIN_H_
 
-#define ADC_CH_REF 30
-#define ADC_REF_MV 1100
-
 #define SLEEP_POWERSAVE ((1 << SM1) | (1 << SM0))
 #define SLEEP SLEEP_POWERSAVE
 
