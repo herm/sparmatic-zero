@@ -29,6 +29,10 @@ uint8_t get_key_rpt(uint8_t key_mask);
 uint8_t get_key_short(uint8_t key_mask);
 uint8_t get_key_long(uint8_t key_mask);
 int8_t get_key_increment(void);
+static inline void keyWaitFor(uint8_t key)
+{
+    while (!get_key_press(1 << key)) {}
+}
 
 extern volatile uint8_t key_state; // debounced and inverted key states
 
