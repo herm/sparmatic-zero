@@ -4,7 +4,7 @@
 
 void debugInit(void);
 void debugString(char *s);
-void debugNumber(uint16_t n);
+void debugNumber(int16_t n);
 void debugBinary(uint16_t n);
 void debugHex(uint16_t n);
 

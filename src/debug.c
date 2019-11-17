@@ -21,7 +21,7 @@ void debugString(char *s)
     }
 }
 
-void debugNumber(uint16_t n)
+void debugNumber(int16_t n)
 {
     char buf[6];
     itoa(n, buf, 10);

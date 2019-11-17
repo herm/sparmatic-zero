@@ -1,27 +1,143 @@
 #include <avr/io.h>
 #include <util/delay.h>
 
-#include "lcd.h"
-#include "keys.h"
+//#include "lcd.h"
+//#include "keys.h"
 #include "motor.h"
-#include "timer.h"
+//#include "timer.h"
 #include "adc.h"
 #include "config.h"
+#include "debug.h"
 
-#define MOTOR_DIR_OUT (MOTOR_DDR |= (1 << MOTOR_PIN_L) | (1 << MOTOR_PIN_R))
-#define MOTOR_DIR_IN (MOTOR_DDR &= ~(1 << MOTOR_PIN_L) | (1 << MOTOR_PIN_R))
-#define MOTOR_STOP (MOTOR_PORT &= ~((1 << MOTOR_PIN_L) | (1 << MOTOR_PIN_R)))
-#define MOTOR_OPEN (MOTOR_PORT |= (1 << MOTOR_PIN_L))
-#define MOTOR_CLOSE (MOTOR_PORT |= (1 << MOTOR_PIN_R))
-
-#define MOTOR_SENSE_ON (MOTOR_SENSE_PORT |= (1 << MOTOR_SENSE_LED_PIN))
-#define MOTOR_SENSE_OFF (MOTOR_SENSE_PORT &= ~(1 << MOTOR_SENSE_LED_PIN))
-
-#define MOTOR_TIMER_START (	LCDCRA |= (1 << LCDIE))
+/* Motor characteristics @ 3.3V:
+ * No load:
+ * ENC: 70-75 counts/s
+ * ADC: 977
+ *
+ * Medium load:
+ * ENC: ~30 counts/s
+ * ADC: ~950-960
+ *
+ * High load:
+ * < 5counts/s
+ * ADC: <945
+ *
+ * ADC value requires about 60ms after motor enable to reach a stable value. Readings seem to vary quite a bit
+ * with voltage and model variations.
+ */
+#define MOTOR_TIMEOUT 10 /* timer cycles => Less than (f_timer/MOTOR_TIMEOUT) counts/s. (f_timer = 64Hz) */
 
 #define DIR_OPEN 1
 #define DIR_CLOSE -1
 #define DIR_STOP 0
+
+#define force_inline inline __attribute__((always_inline))
+uint8_t motor_enabled;
+uint8_t motor_running;
+int8_t motor_direction;
+uint8_t motor_timeout;
+int16_t motor_position;
+int16_t motor_position_max;
+
+static force_inline void motorEnable(void)
+{
+    motor_enabled = 1;
+    MOTOR_SENSE_PORT |= (1 << MOTOR_SENSE_LED_PIN);
+    MOTOR_DDR |= (1 << MOTOR_PIN_L) | (1 << MOTOR_PIN_R);
+    LCDCRA |= (1 << LCDIE); //Enable timer IRQ
+}
+
+static force_inline void motorDisable(void)
+{
+    motor_enabled = 0;
+    MOTOR_DDR &= ~(1 << MOTOR_PIN_L) | (1 << MOTOR_PIN_R);
+    MOTOR_SENSE_PORT &= ~(1 << MOTOR_SENSE_LED_PIN);
+}
+
+static force_inline void motorOpen(void)
+{
+    MOTOR_PORT |= (1 << MOTOR_PIN_L);
+    motor_direction = DIR_OPEN;
+    motor_running = 1;
+}
+
+static force_inline void motorClose(void)
+{
+    MOTOR_PORT |= (1 << MOTOR_PIN_R);
+    motor_direction = DIR_CLOSE;
+    motor_running = 1;
+}
+
+static force_inline void motorStop(void)
+{
+    MOTOR_PORT &= ~((1 << MOTOR_PIN_L) | (1 << MOTOR_PIN_R));
+    motor_direction = DIR_STOP;
+    motor_running = 0;
+}
+
+void motorInit(void)
+{
+    motorStop();
+    motorDisable();
+    MOTOR_SENSE_DDR |= (1 << MOTOR_SENSE_LED_PIN);
+    PCMSK0 |= (1 << MOTOR_SENSE_PIN);
+}
+
+void motorIrq(void)
+{
+    motor_position += motor_direction;
+    motor_timeout = 0;
+}
+
+uint8_t motorTimer(void)
+{
+    motor_timeout++; //is reset in motorIrq()
+    if (motor_timeout > MOTOR_TIMEOUT) {
+        motorStop();
+    }
+    //TODO: Check current
+    return motor_enabled;
+}
+
+void motorAdaptOpen(void)
+{
+    motorEnable();
+    motorOpen();
+    //TODO: Timeout if no stop is found
+    while (motor_running) {
+        debugNumber(motor_position);
+        _delay_ms(30);
+    }
+    motor_position = 0;
+    motorDisable();
+}
+
+void motorAdaptClose(void)
+{
+    motorEnable();
+    motorClose();
+    //TODO: Timeout if no stop is found
+    while (motor_running) {
+        debugNumber(motor_position);
+        _delay_ms(30);
+    }
+    motorStop();
+    motor_position_max = -motor_position;
+    motor_position = 0;
+    motorDisable();
+}
+
+void motorAdapt()
+{
+    motorAdaptOpen();
+    debugString("------\r\n");
+    //TODO: Wait for button
+    motorAdaptClose();
+}
+
+
+#if 0
+
 
 typedef enum
 {
@@ -48,13 +164,7 @@ static int16_t TargetPosition = -1;
  * Motorstrom starke Belastung
  */
 
-void motorInit(void)
-{
-    MOTOR_PORT &= ~((1 << MOTOR_PIN_L) | (1 << MOTOR_PIN_R));
 
-    MOTOR_SENSE_DDR |= (1 << MOTOR_SENSE_LED_PIN);
-    PCMSK0 |= (1 << MOTOR_SENSE_PIN);
-}
 
 static uint16_t getCurrent(void)
 {
@@ -192,6 +302,7 @@ uint8_t motorStep(void)
     // mask sensor pin because pin change interrupt is triggered by all pins on port
     uint8_t state = MOTOR_SENSE_PORT_IN & (1 << MOTOR_SENSE_PIN);
 
+    /* TODO: Why is direction important here? */
     if (((Direction == DIR_OPEN) && state) || ((Direction == DIR_CLOSE) && !state)) {
         setTimeout(MotorTimeout);
         MotorPosition += Direction;
@@ -251,3 +362,4 @@ void motorTimer(void)
         }
     }
 }
+#endif

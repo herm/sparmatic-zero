@@ -25,23 +25,20 @@
 #endif
 
 /// \brief Occurs at each new LCD frame or every second LCD frame in low power mode => 64Hz.
-//TODO: Why are these things which are unrelated to the LCD handled in the LCD interrupt?
 ISR(LCD_vect)
 {
     static uint8_t cnt = 0;
+    uint8_t keep_running = 0;
 
-    uint8_t motorRunning = motorIsRunning();
-    if (motorRunning) {
-        motorTimer();
-    }
+    keep_running += motorTimer();
 
-    keyPeriodicScan();
+    keyPeriodicScan(); /* TODO: Use return code for keep_running. */
     if (key_state & KEY_ALL)
         cnt = 0;
     else
         cnt++;
 
-    if (cnt > 4 && !motorRunning) { /* TODO this simple check may lead to missed keys when they are pressed in the moment the motor is stopped */
+    if (cnt > 4 && !keep_running) {
         cnt = 0;
         LCDCRA &= ~(1 << LCDIE); /* disable LCD Interrupt when keys are handled */
     }
@@ -74,7 +71,7 @@ ISR(PCINT0_vect)
 
     // motor step
     if (changed & (1 << MOTOR_SENSE_PIN)) {
-        motorStep();
+        motorIrq();
     }
 
 #ifdef RADIO
@@ -97,6 +94,7 @@ void ioInit(void)
  */
 static uint8_t valveInit(void)
 {
+#if 0
     displayString("OPEN");
     // open valve (retract actuator)
     if (motorFullOpen() != 0) {
@@ -115,7 +113,7 @@ static uint8_t valveInit(void)
         displayString("EI2 ");
         return 1;
     }
-
+#endif
     return 0;
 }
 
@@ -145,7 +143,7 @@ int main(void)
             sysSleep();
     }
 #endif
-
+    motorAdapt();
     while (1) {
 #ifdef ENCODERTEST
 		#define DISPLAYDEBUG
