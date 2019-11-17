@@ -8,7 +8,7 @@ static TimerCallback TimeoutCallback;
 
 // Timer 2
 volatile uint32_t SystemTime; //monotonic time in seconds
-static volatile TIME Time;
+static volatile date_t Time;
 
 // Timer 0
 ISR(TIMER0_OVF_vect)
@@ -50,7 +50,7 @@ ISR(TIMER2_OVF_vect)
 {
     /* TODO: Check the assembly code of this function. Copying "Time" twice seems to be inefficient. */
     /* TODO: Use full date (with day and month) to allow programming holidays. */
-    TIME tTime = Time;
+    date_t tTime = Time;
 
     tTime.second += 8;
     SystemTime += 8;
@@ -73,9 +73,9 @@ ISR(TIMER2_OVF_vect)
     Time = tTime;
 }
 
-TIME getTime(void)
+date_t getTime(void)
 {
-    TIME res;
+    date_t res;
     cli();
     res = Time;
     sei();
@@ -100,7 +100,7 @@ void timerInit(void)
 }
 
 // Utility functions
-void addToTime(TIME *time, uint8_t hours, uint8_t minutes)
+void addToTime(date_t *time, uint8_t hours, uint8_t minutes)
 {
     uint16_t tempMinute = time->minute + minutes;
     time->minute = tempMinute % 60;

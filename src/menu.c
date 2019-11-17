@@ -225,7 +225,8 @@ void menu(void)
 
     case MENU_VENT:
     {
-        int16_t value;
+        int16_t value = 0;
+#if 0
         if (get_key_increment()) {
             menuData = inputNumber(0, 2, menuData, 1, 4);
         }
@@ -243,6 +244,7 @@ void menu(void)
         default:
             value = -999;
         }
+#endif
         displayNumber(value, 4);
         break;
     }

@@ -39,8 +39,9 @@ void radioInit(void)
 
 void radioSend(void)
 {
+#if 0
     MSG_FROM_THRM msg;
-    TIME time = getTime();
+    date_t time = getTime();
     msg.info.temperatureActual = getNtcTemperature();
     msg.info.valve = getMotorPosition();
     msg.info.battery = getBatteryVoltage();
@@ -50,4 +51,5 @@ void radioSend(void)
     msg.time.minute = time.minute;
 
     nRF24L01_send((uint8_t*) &msg, sizeof(msg), 0);
+#endif
 }

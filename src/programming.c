@@ -27,7 +27,7 @@ uint8_t ProgramData[PROGRAM_DATA_BYTES_PER_WEEKDAY * 7];
 int16_t Temperatures[4] = { 2050, 1450, 1650, 2200 };
 
 /* weekday == 7 -> no dismiss */
-TIME dismissUntil = { 7, 0, 0, 0 };
+date_t dismissUntil = { 7, 0, 0, 0 };
 
 static uint8_t getHourProgram(uint8_t weekday, uint8_t hour)
 {
@@ -63,7 +63,7 @@ void setProgram(uint8_t weekday, uint8_t hour, uint8_t slice, uint8_t temperatur
  */
 void applyProgram(void)
 {
-    TIME time = getTime();
+    date_t time = getTime();
 
     /* crappy weekday-overflow handling... */
     if (dismissUntil.weekday != 7 && (compareTime(&time, &dismissUntil) <= 0 || (time.weekday > 3 && dismissUntil.weekday < 3))) {
@@ -88,7 +88,7 @@ void setTemperature(uint8_t num, uint16_t temperature)
  */
 void dismissProgramChanges(uint16_t minutes)
 {
-    TIME time = getTime();
+    date_t time = getTime();
     addToTime(&time, 0, minutes);
     dismissUntil = time;
 }

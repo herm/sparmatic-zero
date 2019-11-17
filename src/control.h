@@ -26,8 +26,8 @@ typedef struct
     uint8_t i_scale_off; /* divide integral value additions by that when heater is off */
     uint8_t i_scale_p; /* divide same for large p values */
     int8_t i_scale_p_lim; /* (p) > (lim*256) activates i_scale_p */
-} CONTROLLER;
+} controller_t;
 
-extern CONTROLLER controller;
+extern controller_t controller;
 
 #endif /* CONTROL_H_ */

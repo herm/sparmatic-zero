@@ -13,7 +13,7 @@ typedef struct
     uint8_t hour;
     uint8_t minute;
     uint8_t second;
-} TIME;
+} date_t;
 
 void timerInit(void);
 
@@ -21,11 +21,11 @@ void enableTimeout(TimerCallback cbk, uint8_t timeout);
 void setTimeout(uint8_t timeout);
 void disableTimeout(void);
 
-TIME getTime(void);
+date_t getTime(void);
 
-void addToTime(TIME *time, uint8_t hours, uint8_t minutes);
+void addToTime(date_t *time, uint8_t hours, uint8_t minutes);
 
-static inline uint8_t compareTime(TIME *a, TIME *b)
+static inline uint8_t compareTime(date_t *a, date_t *b)
 {
     if (a->weekday < b->weekday) return -1;
     if (a->weekday > b->weekday) return 1;

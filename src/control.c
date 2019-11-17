@@ -11,7 +11,7 @@
 int16_t targetTemperature;
 
 /* a controller result of 0 will set vent to halve open */
-CONTROLLER controller = { 150, /* k_p */
+controller_t controller = { 150, /* k_p */
 10, /* k_d 50: +0.5 deg in 60 seconds -> ud~ -50 */
 2, /* k_i */
 -15000, /* i_val */
@@ -30,7 +30,8 @@ CONTROLLER controller = { 150, /* k_p */
  */
 void control(void)
 {
-    CONTROLLER ctrl = controller;
+#if 0
+    controller_t ctrl = controller;
     uint32_t systemTime = SystemTime;
     uint8_t deltaTime = systemTime - controller.t_last;
     int16_t e = targetTemperature - getNtcTemperature();
@@ -69,6 +70,7 @@ void control(void)
     ctrl.e_last = e;
     ctrl.t_last = systemTime;
     controller = ctrl;
+#endif
 }
 
 /**
