@@ -1,10 +1,9 @@
 #include <avr/io.h>
 #include <util/delay.h>
 
-//#include "lcd.h"
-//#include "keys.h"
+#include "lcd.h"
+#include "keys.h"
 #include "motor.h"
-//#include "timer.h"
 #include "adc.h"
 #include "config.h"
 #include "debug.h"
@@ -129,10 +128,18 @@ void motorAdaptClose(void)
 
 void motorAdapt()
 {
+    //TODO: Error checking
+    displayString(" -> ");
     motorAdaptOpen();
-    debugString("------\r\n");
-    //TODO: Wait for button
+    displayString("ADAP");
+    while (!get_key_press(1 << KEY_OK)) {}
+    displayString(" <- ");
     motorAdaptClose();
+}
+
+uint8_t motorIsAdapted(void)
+{
+    return motor_position_max != 0;
 }
 
 

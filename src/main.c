@@ -24,7 +24,8 @@
 #include "radio.h"
 #endif
 
-/// \brief Occurs at each new LCD frame or every second LCD frame in low power mode => 64Hz.
+/* \brief Occurs at each new LCD frame or every second LCD frame in low power mode => 64Hz.
+ * This is used as a generic time base without having to waste power for a timer. */
 ISR(LCD_vect)
 {
     static uint8_t cnt = 0;
@@ -89,34 +90,6 @@ void ioInit(void)
     DIDR0 = 0xFF; /* Disable digital inputs on Port F */
 }
 
-/* Valve initialization UI.
- * returns 1 on error
- */
-static uint8_t valveInit(void)
-{
-#if 0
-    displayString("OPEN");
-    // open valve (retract actuator)
-    if (motorFullOpen() != 0) {
-        displayString("EI1 ");
-        return 1;
-    }
-
-    // wait for user input
-    displayString("INST");
-    while (!get_key_press(1 << KEY_OK)) {
-    }
-
-    // close valve (protract actuator)
-    displayString("ADAP");
-    if (motorAdapt()) {
-        displayString("EI2 ");
-        return 1;
-    }
-#endif
-    return 0;
-}
-
 int main(void)
 {
     _delay_ms(50);
@@ -128,33 +101,17 @@ int main(void)
     motorInit();
     lcdInit();
     keyInit();
-#ifdef ENCODER
     encoderInit();
-#endif
     ntcInit();
 #ifdef RADIO
 	funkInit();
 #endif
     sei();
     debugString("Init done\r\n");
-#if 0
-    if (valveInit()) {
-        while (1) // we do not want to operate with an incorrect setup
-            sysSleep();
+    while (!motorIsAdapted()) {
+        motorAdapt();
     }
-#endif
-    motorAdapt();
     while (1) {
-#ifdef ENCODERTEST
-		#define DISPLAYDEBUG
-		static int8_t delta = 0;
-		// delta += encoderRead();	// this will show the value ("---1" or "   1") and a blank screen (0="    ") alternating
-		delta += get_key_increment();	// this will show the value ("---1" or "   1") and a blank screen (0="    ") alternating
-		// int8_t delta = ((PINB & (1<<PB7)) >> 7) * 10 + (PINB & (1<<PB0));	// show the state
-		displayNumber(delta, 4);
-		// _delay_ms(100);
-		#endif
-
 #ifndef DISPLAYDEBUG
         updateNtcTemperature();
         updateBattery();
