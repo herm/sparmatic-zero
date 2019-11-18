@@ -80,7 +80,7 @@ void sysShutdown(void)
 }
 
 
-/* TODO: This returns completely wrong values. The calculation seems to be OK, but the ADC are not.
+/* TODO: This returns completely wrong values. The calculation seems to be OK, but the ADC values are not.
  * Using the bandgap voltage as a reference is was measured at 1.099V at the Vref pin. */
 void updateBattery(void)
 {

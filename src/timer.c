@@ -3,46 +3,12 @@
 #include "timer.h"
 
 // Timer 0
-volatile uint8_t Timer0H;
-static TimerCallback TimeoutCallback;
+//volatile uint8_t Timer0H;
+//static TimerCallback TimeoutCallback;
 
 // Timer 2
 volatile uint32_t SystemTime; //monotonic time in seconds
 static volatile date_t Time;
-
-// Timer 0
-ISR(TIMER0_OVF_vect)
-{
-    ++Timer0H;
-}
-
-ISR(TIMER0_COMP_vect)
-{
-    if (TimeoutCallback) {
-        TimeoutCallback();
-        TimeoutCallback = 0;
-        TIMSK0 &= ~(1 << OCIE0A);
-    }
-}
-
-void enableTimeout(TimerCallback cbk, uint8_t timeout)
-{
-    TimeoutCallback = cbk;
-    OCR0A = TCNT0 + timeout;
-    TIFR0 |= (1 << OCF0A);
-    TIMSK0 |= (1 << OCIE0A);
-}
-
-void setTimeout(uint8_t timeout)
-{
-    OCR0A = TCNT0 + timeout;
-}
-
-void disableTimeout()
-{
-    TIMSK0 &= ~(1 << OCIE1A);
-    TimeoutCallback = 0;
-}
 
 // Timer 2
 /* used for waking up the device periodically */
@@ -93,10 +59,6 @@ void timerInit(void)
         ;
     TIFR2 = (1 << OCF2A) | (1 << TOV2);
     TIMSK2 = (1 << TOIE2);
-
-    //TODO: Timer 0 is always running and generating interrupts at a high rate even when it is not used.
-    TCCR0A = (1 << CS00) | (1 << CS02); /* CLK / 1024 -> 1ms */
-    TIMSK0 = (1 << TOIE0);
 }
 
 // Utility functions

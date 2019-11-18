@@ -1,9 +1,6 @@
 #ifndef TIMER_H_
 #define TIMER_H_
 
-typedef void (*TimerCallback)(void);
-extern volatile uint8_t Timer0H;
-
 /* long system timer, incremented every 8 seconds. Starts at 0 on every system reset. */
 extern volatile uint32_t SystemTime;
 
@@ -16,10 +13,6 @@ typedef struct
 } date_t;
 
 void timerInit(void);
-
-void enableTimeout(TimerCallback cbk, uint8_t timeout);
-void setTimeout(uint8_t timeout);
-void disableTimeout(void);
 
 date_t getTime(void);
 

@@ -13,16 +13,9 @@
 #include "timer.h"
 #include "adc.h"
 #include "control.h"
-#include "programming.h"
 #include "menu.h"
 #include "encoder.h"
 #include "power.h"
-
-#ifdef RADIO
-#include "nRF24L01.h"
-#include "nRF24L01_ll.h"
-#include "radio.h"
-#endif
 
 /* \brief Occurs at each new LCD frame or every second LCD frame in low power mode => 64Hz.
  * This is used as a generic time base without having to waste power for a timer. */
@@ -55,11 +48,7 @@ ISR(LCD_vect)
 #define PCINT0_PORTIN PINE
 ISR(PCINT0_vect)
 {
-#ifdef RADIO
-	static unsigned char lastState = (1 << IRQ_PIN);	// init to defaults
-#else
     static unsigned char lastState = 0; // init to defaults
-#endif
 
     unsigned char newState = PCINT0_PORTIN;
     unsigned char changed = newState ^ lastState;
@@ -75,13 +64,6 @@ ISR(PCINT0_vect)
         motorIrq();
     }
 
-#ifdef RADIO
-	// radio IRQ
-	if(~newState & (1 << IRQ_PIN))
-	{
-		nRF24L01_IRQ();
-	}
-#endif
 }
 
 
@@ -94,7 +76,6 @@ int main(void)
 {
     _delay_ms(50);
     debugInit();
-    debugString("Start\r\n");
     timerInit();
     pwrInit();
     ioInit();
@@ -103,31 +84,17 @@ int main(void)
     keyInit();
     encoderInit();
     ntcInit();
-#ifdef RADIO
-	funkInit();
-#endif
     sei();
     debugString("Init done\r\n");
     while (!motorIsAdapted()) {
         motorAdapt();
     }
     while (1) {
-#ifndef DISPLAYDEBUG
         updateNtcTemperature();
         updateBattery();
         menu();
 
-#ifdef RADIO
-		if(lastStatusMessageSent + RF_STATUS_MESSAGES < SystemTime)
-		{
-			radioSend();
-			lastStatusMessageSent = SystemTime;
-		}
-		#endif
-
-#endif
         sysSleep();
     }
-
     return -1;
 }

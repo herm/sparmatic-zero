@@ -15,6 +15,6 @@ The reflex coupler also raises IRQ `PCINT0_vect`
 
 # Timers
 * LCD frame interrupt (64Hz): Used for button and motor handling
-* Timer 0 (1kHz): Overflow (256ms): Timeout for button presses, OCR0: Used for enableTimeout()/setTimeout() for motor control
+* Timer 0: unused
 * Timer 1: unused
 * Timer 2 (32Hz): Overflow(8s): RTC, OCR2A: Unknown function in system sleep
