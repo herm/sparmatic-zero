@@ -75,7 +75,7 @@ static const uint8_t BargraphSegments[] PROGMEM = { 88, 48, 8, 9, 49, 89, 90, 50
 static const uint8_t WeekdaySegments[] PROGMEM = { 128, 129, 130, 131, 132, 133, 95 };
 
 /* enum LCD_SYMBOLS */
-static const uint8_t SymbolSegments[] PROGMEM = { 80, 120, 40, 23, 24, 64, 104, 144, 103, 143, 135, 0 };
+static const uint8_t SymbolSegments[] PROGMEM = { 80, 120, 40, 23, 24, 64, 104, 144, 103, 143, 135, 0, 63 };
 
 static void segmentOn(uint8_t segment)
 {
