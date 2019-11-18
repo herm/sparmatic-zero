@@ -8,6 +8,9 @@
 #include "config.h"
 #include "debug.h"
 
+#define MOTOR_DEBUG_POWER
+#define MOTOR_DEBUG_ADAPT_ONE_WAY
+
 /* Motor characteristics @ 3.3V:
  * No load:
  * ENC: 70-75 counts/s
@@ -43,23 +46,31 @@ int16_t motor_position_target;
 
 static void motorEnable(void)
 {
+    if (motor_enabled) return;
     motor_enabled = 1;
     motor_runtime = 0;
     motor_timeout = 0;
     MOTOR_SENSE_PORT |= (1 << MOTOR_SENSE_LED_PIN);
     MOTOR_DDR |= (1 << MOTOR_PIN_L) | (1 << MOTOR_PIN_R);
     LCDCRA |= (1 << LCDIE); //Enable timer IRQ
+#ifdef MOTOR_DEBUG_POWER
+    displaySymbols(LCD_LOCK, LCD_LOCK);
+#endif
 }
 
 static force_inline void motorDisable(void)
 {
     motor_enabled = 0;
-    MOTOR_DDR &= ~(1 << MOTOR_PIN_L) | (1 << MOTOR_PIN_R);
+    MOTOR_DDR &= ~(1 << MOTOR_PIN_L) | (1 << MOTOR_PIN_R); //TODO: Does this actually conserve power?
     MOTOR_SENSE_PORT &= ~(1 << MOTOR_SENSE_LED_PIN);
+#ifdef MOTOR_DEBUG_POWER
+    displaySymbols(0, LCD_LOCK);
+#endif
 }
 
 static force_inline void motorOpen(void)
 {
+    motorEnable();
     MOTOR_PORT |= (1 << MOTOR_PIN_L);
     motor_direction = DIR_OPEN;
     motor_running = 1;
@@ -67,6 +78,7 @@ static force_inline void motorOpen(void)
 
 static force_inline void motorClose(void)
 {
+    motorEnable();
     MOTOR_PORT |= (1 << MOTOR_PIN_R);
     motor_direction = DIR_CLOSE;
     motor_running = 1;
@@ -98,6 +110,8 @@ uint8_t motorTimer(void)
     motor_timeout++; //is reset in motorIrq()
     if (motor_timeout > MOTOR_TIMEOUT) {
         motorStop();
+        /* Note: This timeout also expires if the motor was stopped intentionally and is used to disable the driver in this case. */
+        motorDisable();
     }
     if (motor_running) {
         motor_runtime++;
@@ -122,7 +136,6 @@ uint8_t motorTimer(void)
 
 uint8_t motorAdaptOpen(void)
 {
-    motorEnable();
     motorOpen();
     while (motor_running) {
         debugNumber(motor_position);
@@ -131,13 +144,11 @@ uint8_t motorAdaptOpen(void)
         }
     }
     motor_position = 0;
-    motorDisable();
     return motor_runtime <= MOTOR_MAX_RUNTIME_OPEN;
 }
 
 uint8_t motorAdaptClose(void)
 {
-    motorEnable();
     motorClose();
     while (motor_running) {
         debugNumber(motor_position);
@@ -145,8 +156,6 @@ uint8_t motorAdaptClose(void)
             motorStop();
         }
     }
-
-    motorDisable();
 
     if (motor_runtime <= MOTOR_MAX_RUNTIME_CLOSE) {
         motor_position_max = -motor_position;
@@ -187,7 +196,6 @@ uint8_t motorIsAdapted(void)
 
 void motorSetPosition(int16_t position)
 {
-    motorEnable();
     if (position > motor_position) {
         motorOpen();
     } else if (position < motor_position) {
