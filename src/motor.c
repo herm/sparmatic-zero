@@ -39,8 +39,9 @@ uint8_t motor_timeout;
 uint16_t motor_runtime;
 int16_t motor_position;
 int16_t motor_position_max;
+int16_t motor_position_target;
 
-static force_inline void motorEnable(void)
+static void motorEnable(void)
 {
     motor_enabled = 1;
     motor_runtime = 0;
@@ -100,6 +101,20 @@ uint8_t motorTimer(void)
     }
     if (motor_running) {
         motor_runtime++;
+    }
+    if (motor_position_max) {
+        // Already adapted => Check position
+        // Calling motorStop() when reaching the exact value is usually enough to stop within +-1 count.
+        // However sometimes we move fast enough to not see the value at all. Therefore we must check if we exceeded the value.
+        if (motor_direction == DIR_OPEN) {
+             if (motor_position >= motor_position_target) {
+                 motorStop();
+             }
+        } else if (motor_direction == DIR_CLOSE) {
+            if (motor_position <= motor_position_target) {
+                motorStop();
+            }
+        }
     }
     //TODO: Check current
     return motor_enabled;
@@ -168,4 +183,18 @@ error:
 uint8_t motorIsAdapted(void)
 {
     return motor_position_max != 0;
+}
+
+void motorSetPosition(int16_t position)
+{
+    motorEnable();
+    if (position > motor_position) {
+        motorOpen();
+    } else if (position < motor_position) {
+        motorClose();
+    }
+    motor_position_target = position;
+    while (motor_running) {
+        debugNumber(motor_position);
+    }
 }
