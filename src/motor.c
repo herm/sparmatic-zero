@@ -166,6 +166,15 @@ uint8_t motorAdaptClose(void)
     }
 }
 
+#ifdef MOTOR_DEBUG_ADAPT_ONE_WAY
+void motorAdapt()
+{
+    displayString("DBG ");
+    motorAdaptOpen();
+    motor_position = MOTOR_MIN_RANGE;
+    motor_position_max = MOTOR_MIN_RANGE;
+}
+#else
 void motorAdapt()
 {
     displayString(" -> ");
@@ -188,6 +197,7 @@ error:
     displayString("ERR1");
     keyWaitFor(KEY_OK);
 }
+#endif
 
 uint8_t motorIsAdapted(void)
 {
