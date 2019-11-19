@@ -12,6 +12,7 @@
 
 void menu(void)
 {
-    displayNumber(getNtcTemperature(), 4);
+    displayNumber((getNtcTemperature()+5)/10, 3);
+    displayAsciiDigit(LCD_DEGREE, 3);
     displaySymbols(LCD_DOT, LCD_DOT);
 }

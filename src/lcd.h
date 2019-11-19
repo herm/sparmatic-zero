@@ -20,6 +20,10 @@ typedef enum
     LCD_DOT = 4096
 } LCD_SYMBOLS;
 
+#define LCD_DELTA ';'
+#define LCD_PLUS  '='
+#define LCD_DEGREE '@'
+
 #define LCD_SYM_ALL (2 * LCD_HOURS - 1)
 
 void lcdInit(void);
