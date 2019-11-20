@@ -25,7 +25,9 @@ volatile uint8_t key_press; // key press detect
 
 volatile uint8_t key_rpt; // key long press and repeat
 
-void keyPeriodicScan(void)
+uint8_t key_irq_turn_off_delay;
+
+uint8_t keyPeriodicScan(void)
 {
     static uint8_t ct0, ct1, rpt;
     uint8_t i;
@@ -43,6 +45,12 @@ void keyPeriodicScan(void)
         rpt = REPEAT_NEXT; // repeat delay
         key_rpt |= key_state & REPEAT_MASK;
     }
+    if (key_state & KEY_ALL) {
+        key_irq_turn_off_delay = 0;
+    } else if (key_irq_turn_off_delay < 255) {
+        key_irq_turn_off_delay++;
+    }
+    return key_irq_turn_off_delay < 5;
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -129,6 +137,7 @@ void keyInit(void)
 
 ISR(PCINT1_vect)
 {
+    key_irq_turn_off_delay = 0;
     /* used for waking up the device by key press*/
     LCDCRA |= (1 << LCDIE);
 

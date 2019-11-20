@@ -21,20 +21,11 @@
  * This is used as a generic time base without having to waste power for a timer. */
 ISR(LCD_vect)
 {
-    static uint8_t cnt = 0;
     uint8_t keep_running = 0;
-
     keep_running += motorTimer();
-
-    keyPeriodicScan(); /* TODO: Use return code for keep_running. */
-    if (key_state & KEY_ALL)
-        cnt = 0;
-    else
-        cnt++;
-
-    if (cnt > 4 && !keep_running) {
-        cnt = 0;
-        LCDCRA &= ~(1 << LCDIE); /* disable LCD Interrupt when keys are handled */
+    keep_running += keyPeriodicScan();
+    if (!keep_running) {
+        LCDCRA &= ~(1 << LCDIE); /* disable LCD Interrupt when it is no longer required */
     }
 }
 

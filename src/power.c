@@ -37,11 +37,8 @@ void sysSleep(void)
 }
 
 /// \brief Disable hardware and save data to non-volatile memory on battery removal.
-//TODO: Do not disable pull ups!
 void sysShutdown(void)
 {
-    // Lcd_Symbol(BAT, 1 ); // TESTING (barely visible)
-
     // ADC
     ADCSRA = 0;
 
