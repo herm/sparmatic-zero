@@ -197,7 +197,6 @@ void displayString(char *str)
 /// a minus sign is provided for negative numbers. (so we have
 /// three remaining characters). Output will be left adjusted.
 /// @param width leading with zeroes so we have given width
-/// todo: filling width will be done with sign character...
 ///
 void displayNumber(int16_t num, int8_t width)
 {
@@ -217,6 +216,7 @@ void displayNumber(int16_t num, int8_t width)
     width -= NUM_DIGITS - i; /* subtract already written chars */
     while (i && width > 0) {
         buf[--i] = sign; /* leading sign chars */
+        sign = ' ';
         --width;
     }
     displayString(&buf[i]); /* begin output at first wanted character */
@@ -262,13 +262,13 @@ void lcdInit(void)
 
 void lcdOff(void)
 {
-    //TODO: What happens when LCD interrupts are enabled at this point?
+    LCDCRA &= ~(1 << LCDIE);
+    // Note: This code is almost directly from the datasheet
     // Disable LCD
-    // Wait until a new frame is started. //TODO: Is this wait required?
+    // Wait until a new frame is started.
     while (!(LCDCRA & (1 << LCDIF)))
         ;
-    // Set LCD Blanking and clear interrupt flag
-    // by writing a logical one to the flag.
+    // Set LCD Blanking and clear interrupt flag by writing a logical one to the flag.
     LCDCRA = (1 << LCDEN) | (1 << LCDIF) | (1 << LCDBL);
     // Wait until LCD Blanking is effective.
     while (!(LCDCRA & (1 << LCDIF)))
