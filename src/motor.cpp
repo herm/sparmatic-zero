@@ -32,22 +32,24 @@
 #define MOTOR_MAX_RUNTIME_CLOSE ((uint16_t)((uint32_t)F_TIMER * MOTOR_MAX_RUNTIME_CLOSE_S))
 #define DIR_OPEN 1
 #define DIR_CLOSE -1
-#define DIR_STOP 0
+#define DIR_DISABLED 0
 
 #define force_inline inline __attribute__((always_inline))
-uint8_t motor_enabled;
-uint8_t motor_running;
-int8_t motor_direction;
-uint8_t motor_timeout;
-uint16_t motor_runtime;
-int16_t motor_position;
-int16_t motor_position_max;
-int16_t motor_position_target;
+volatile int8_t motor_direction;
+volatile uint8_t motor_timeout;
+volatile uint16_t motor_runtime;
+volatile int16_t motor_position;
+volatile int16_t motor_position_max;
+volatile int16_t motor_position_target;
+
+/* TODO: Reduce number of accesses to volatile variable.
+ * TODO: Make sure all 16 bit accesses are atomic.
+ */
+
+#define motor_running (motor_direction != DIR_DISABLED)
 
 static void motorEnable(void)
 {
-    if (motor_enabled) return;
-    motor_enabled = 1;
     motor_runtime = 0;
     motor_timeout = 0;
     MOTOR_SENSE_PORT |= (1 << MOTOR_SENSE_LED_PIN);
@@ -60,7 +62,8 @@ static void motorEnable(void)
 
 static force_inline void motorDisable(void)
 {
-    motor_enabled = 0;
+    motor_direction = DIR_DISABLED;
+    MOTOR_PORT &= ~((1 << MOTOR_PIN_L) | (1 << MOTOR_PIN_R));
     MOTOR_DDR &= ~(1 << MOTOR_PIN_L) | (1 << MOTOR_PIN_R); //TODO: Does this actually conserve power?
     MOTOR_SENSE_PORT &= ~(1 << MOTOR_SENSE_LED_PIN);
 #ifdef MOTOR_DEBUG_POWER
@@ -70,30 +73,30 @@ static force_inline void motorDisable(void)
 
 static force_inline void motorOpen(void)
 {
+    motor_direction = DIR_OPEN;
     motorEnable();
     MOTOR_PORT |= (1 << MOTOR_PIN_L);
-    motor_direction = DIR_OPEN;
-    motor_running = 1;
 }
 
 static force_inline void motorClose(void)
 {
+    motor_direction = DIR_CLOSE;
     motorEnable();
     MOTOR_PORT |= (1 << MOTOR_PIN_R);
-    motor_direction = DIR_CLOSE;
-    motor_running = 1;
 }
 
 static force_inline void motorStop(void)
 {
     MOTOR_PORT &= ~((1 << MOTOR_PIN_L) | (1 << MOTOR_PIN_R));
-    motor_direction = DIR_STOP;
-    motor_running = 0;
+    /* Motor will be disabled by the timer after a timeout.
+     * It might still move a bit after disabling its power.
+     * Disabling the encoder right here might lose some steps.
+     * This is also the reason why motor_direction must not be modified here
+     */
 }
 
 void motorInit(void)
 {
-    motorStop();
     motorDisable();
     MOTOR_SENSE_DDR |= (1 << MOTOR_SENSE_LED_PIN);
     PCMSK0 |= (1 << MOTOR_SENSE_PIN);
@@ -107,8 +110,7 @@ void motorIrq(void)
 
 uint8_t motorTimer(void)
 {
-    motor_timeout++; //is reset in motorIrq()
-    if (motor_timeout > MOTOR_TIMEOUT) {
+    if (++motor_timeout > MOTOR_TIMEOUT) {
         motorStop();
         /* Note: This timeout also expires if the motor was stopped intentionally and is used to disable the driver in this case. */
         motorDisable();
@@ -131,14 +133,14 @@ uint8_t motorTimer(void)
         }
     }
     //TODO: Check current
-    return motor_enabled;
+    return motor_running;
 }
 
 uint8_t motorAdaptOpen(void)
 {
     motorOpen();
     while (motor_running) {
-        debugNumber(motor_position);
+//        debugNumber(motor_position);
         if (motor_runtime > MOTOR_MAX_RUNTIME_OPEN) {
             motorStop();
         }
@@ -151,7 +153,7 @@ uint8_t motorAdaptClose(void)
 {
     motorClose();
     while (motor_running) {
-        debugNumber(motor_position);
+//        debugNumber(motor_position);
         if (motor_runtime > MOTOR_MAX_RUNTIME_CLOSE) {
             motorStop();
         }
