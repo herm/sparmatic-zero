@@ -12,7 +12,7 @@ void debugInit(void)
     UCSR0C = _BV(UCSZ01) | _BV(UCSZ00); //8n1
 }
 
-void debugString(char *s)
+void debugString(const char *s)
 {
     char c;
     while ((c = *s++)) {

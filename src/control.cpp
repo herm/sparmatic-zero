@@ -4,7 +4,6 @@
 #include <util/delay.h>
 
 #include "ntc.h"
-#include "timer.h"
 #include "motor.h"
 #include "control.h"
 

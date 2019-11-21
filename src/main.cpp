@@ -10,7 +10,6 @@
 #include "keys.h"
 #include "ntc.h"
 #include "motor.h"
-#include "timer.h"
 #include "adc.h"
 #include "control.h"
 #include "menu.h"
@@ -22,9 +21,9 @@
  * This is used as a generic time base without having to waste power for a timer. */
 ISR(LCD_vect)
 {
-    uint8_t keep_running = 0;
-    keep_running += motorTimer();
-    keep_running += keyPeriodicScan();
+    uint8_t keep_running = 0; /* If any handler returns non-zero this interrupt is kept enabled. */
+    keep_running |= motorTimer();
+    keep_running |= keyPeriodicScan();
     if (!keep_running) {
         LCDCRA &= ~(1 << LCDIE); /* disable LCD Interrupt when it is no longer required */
     }
@@ -69,7 +68,6 @@ int main(void)
 {
     _delay_ms(50);
     debugInit();
-    timerInit();
     pwrInit();
     ioInit();
     motorInit();
@@ -90,5 +88,4 @@ int main(void)
 
         sysSleep();
     }
-    return -1;
 }

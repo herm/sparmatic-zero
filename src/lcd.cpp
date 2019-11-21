@@ -183,7 +183,7 @@ void displayAsciiDigit(char c, uint8_t pos)
  * Outputs a string on the display, beginning on the left digit.
  * @param str string to display, it is displayed up to NUM_DIGITS
  */
-void displayString(char *str)
+void displayString(const char *str)
 {
     uint8_t pos = 0;
     while (str[pos] && pos < NUM_DIGITS) {

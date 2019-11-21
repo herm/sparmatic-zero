@@ -3,7 +3,7 @@
 #include <stdint.h>
 
 void debugInit(void);
-void debugString(char *s);
+void debugString(const char *s);
 void debugNumber(int16_t n);
 void debugBinary(uint16_t n);
 void debugHex(uint16_t n);

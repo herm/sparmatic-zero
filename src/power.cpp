@@ -33,7 +33,7 @@ void sysSleep(void)
         /* wait at least one asynchronous clock cycle for interrupt logic to reset */
         ;
     sleep_mode();
-    displaySymbols(0, LCD_BATTERY);
+    displaySymbols(LCD_NONE, LCD_BATTERY);
 }
 
 /// \brief Disable hardware and save data to non-volatile memory on battery removal.

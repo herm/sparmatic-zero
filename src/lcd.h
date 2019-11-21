@@ -5,6 +5,7 @@
 
 typedef enum
 {
+    LCD_NONE = 0,
     LCD_AUTO = 1,
     LCD_MANU = 2,
     LCD_BAG = 4,
@@ -28,7 +29,7 @@ typedef enum
 
 void lcdInit(void);
 void displayAsciiDigit(char c, uint8_t pos);
-void displayString(char *str);
+void displayString(const char *str);
 void displayNumber(int16_t num, int8_t width);
 void displayBargraph(uint32_t bargraphOn);
 void displayWeekday(uint8_t dayOn);

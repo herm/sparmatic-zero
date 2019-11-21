@@ -51,7 +51,7 @@ FORMAT = ihex
 TARGET = main
 
 # List C source files here. (C dependencies are automatically generated.)
-SRC = $(TARGET).c lcd.c keys.c ntc.c motor.c timer.c control.c encoder.c menu.c debug.c power.c
+SRC = $(TARGET).cpp lcd.cpp keys.cpp ntc.cpp motor.cpp control.cpp encoder.cpp menu.cpp debug.cpp power.cpp
 
 # List Assembler source files here.
 # Make them always end in a capital .S.  Files ending in a lowercase .s
@@ -83,7 +83,7 @@ EXTRAINCDIRS =
 # gnu89 - c89 plus GCC extensions
 # c99   - ISO C99 standard (not yet fully implemented)
 # gnu99 - c99 plus GCC extensions
-CSTANDARD = -std=gnu99
+CSTANDARD = -std=c++11
 
 # Place -D or -U options here
 CDEFS =
@@ -103,8 +103,8 @@ CFLAGS = -g$(DEBUG)
 CFLAGS += $(CDEFS) $(CINCS)
 CFLAGS += -O$(OPT)
 CFLAGS += -funsigned-char -funsigned-bitfields -fpack-struct -fshort-enums
-CFLAGS += -Wall -Wstrict-prototypes
-CFLAGS += -Wa,-adhlns=$(<:.c=.lst)
+CFLAGS += -Wall
+CFLAGS += -Wa,-adhlns=$(<:.cpp=.lst)
 CFLAGS += $(patsubst %,-I%,$(EXTRAINCDIRS))
 CFLAGS += $(CSTANDARD)
 CFLAGS += -DF_OSC=$(F_OSC)
@@ -218,7 +218,7 @@ DIRLIB = $(DIRAVR)/avr/lib
 
 # Define programs and commands.
 SHELL = sh
-CC = avr-gcc
+CC = avr-g++
 OBJCOPY = avr-objcopy
 OBJDUMP = avr-objdump
 SIZE = avr-size
@@ -252,10 +252,10 @@ MSG_CLEANING = Cleaning project:
 
 
 # Define all object files.
-OBJ = $(SRC:.c=.o) $(ASRC:.S=.o)
+OBJ = $(SRC:.cpp=.o) $(ASRC:.S=.o)
 
 # Define all listing files.
-LST = $(ASRC:.S=.lst) $(SRC:.c=.lst)
+LST = $(ASRC:.S=.lst) $(SRC:.cpp=.lst)
 
 
 # Compiler flags to generate dependency files.
@@ -380,14 +380,14 @@ extcoff: $(TARGET).elf
 
 
 # Compile: create object files from C source files.
-%.o : %.c
+%.o : %.cpp
 	@echo
 	@echo $(MSG_COMPILING) $<
 	$(CC) -c $(ALL_CFLAGS) $< -o $@
 
 
 # Compile: create assembler files from C source files.
-%.s : %.c
+%.s : %.cpp
 	$(CC) -S $(ALL_CFLAGS) $< -o $@
 
 
@@ -418,8 +418,8 @@ clean_list :
 	$(REMOVE) $(TARGET).lss
 	$(REMOVE) $(OBJ)
 	$(REMOVE) $(LST)
-	$(REMOVE) $(SRC:.c=.s)
-	$(REMOVE) $(SRC:.c=.d)
+	$(REMOVE) $(SRC:.cpp=.s)
+	$(REMOVE) $(SRC:.cpp=.d)
 	$(REMOVE) .dep/*
 
 

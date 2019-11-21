@@ -64,7 +64,7 @@ static force_inline void motorDisable(void)
     MOTOR_DDR &= ~(1 << MOTOR_PIN_L) | (1 << MOTOR_PIN_R); //TODO: Does this actually conserve power?
     MOTOR_SENSE_PORT &= ~(1 << MOTOR_SENSE_LED_PIN);
 #ifdef MOTOR_DEBUG_POWER
-    displaySymbols(0, LCD_LOCK);
+    displaySymbols(LCD_NONE, LCD_LOCK);
 #endif
 }
 
