@@ -73,9 +73,27 @@
 #define NTC_PIN PF3
 #define ADC_CH_NTC 1
 
-
 /*************************************************************************
  ****************************** Radio ************************************
  *************************************************************************/
+/* nRF24L01+ Mini module pinout:
+ * Pin numbering starts at the side closer to the white dot on the PCB
+ * 1: +3V3
+ * 2: GND
+ * 3: CE
+ * 4: CSN
+ * 5: SCK
+ * 6: MOSI
+ * 7: MISO
+ * 8: IRQ
+ */
+#define NRF24L01_PORT_CE PORTF
+#define NRF24L01_PIN_CE PF7
+#define NRF24L01_PORT_CSN PORTF
+#define NRF24L01_PIN_CSN PF5
+#define SPI_PIN_SCK PB1
+#define SPI_PIN_MOSI PB2
+#define SPI_PIN_MISO PB3
+#define SPI_DDR DDRB
 
 #endif

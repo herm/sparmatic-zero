@@ -16,6 +16,7 @@
 #include "menu.h"
 #include "encoder.h"
 #include "power.h"
+#include "spi.h"
 
 /* \brief Occurs at each new LCD frame or every second LCD frame in low power mode => 64Hz.
  * This is used as a generic time base without having to waste power for a timer. */
@@ -57,10 +58,11 @@ ISR(PCINT0_vect)
 
 }
 
-
 void ioInit(void)
 {
-    DIDR0 = 0xFF; /* Disable digital inputs on Port F */
+    DIDR0 = 0x0F; /* Disable digital inputs on Port F 0-3*/
+    DDRF = (1 << NRF24L01_PIN_CE) | (1 << NRF24L01_PIN_CSN);
+    SPI_DDR |= (1 << SPI_PIN_MOSI) | (1 << SPI_PIN_SCK);
 }
 
 int main(void)
@@ -75,6 +77,7 @@ int main(void)
     keyInit();
     encoderInit();
     ntcInit();
+    spiInit();
     sei();
     debugString("Init done\r\n");
     while (!motorIsAdapted()) {
