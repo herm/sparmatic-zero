@@ -1,9 +1,6 @@
-#include <avr/io.h>
-#include <avr/interrupt.h>
-#include <util/delay.h>
+#include "main.h"
 
 #include "config.h"
-#include "main.h"
 
 #include "debug.h"
 #include "lcd.h"
@@ -16,6 +13,10 @@
 #include "encoder.h"
 #include "power.h"
 #include "spi.h"
+
+#include <avr/io.h>
+#include <avr/interrupt.h>
+#include <util/delay.h>
 
 /* \brief Occurs at each new LCD frame or every second LCD frame in low power mode => 64Hz.
  * This is used as a generic time base without having to waste power for a timer. */

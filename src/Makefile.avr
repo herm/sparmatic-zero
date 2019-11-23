@@ -1,0 +1,130 @@
+ifneq ($(strip $(NO_DEFAULT_FILES)),True)
+CPPSRC += $(SYSTEMDIR)/pin.cpp $(SYSTEMDIR)/adc.cpp $(SYSTEMDIR)/i2c.cpp $(SYSTEMDIR)/uart.cpp
+endif
+
+SRC += $(SYSTEMDIR)/fuses.c
+
+BASEFLAGS = -g3 -O$(OPT)
+BASEFLAGS += -funsigned-char -funsigned-bitfields -fshort-enums #-fpack-struct
+BASEFLAGS += -Wall -Wcast-align -Wcast-qual -Wextra -Wshadow
+BASEFLAGS += -Wpointer-arith -Wswitch -Wredundant-decls -Wreturn-type -Wunused
+BASEFLAGS += -Wa,-adhlns=$(subst $(suffix $<),.lst,$<)
+BASEFLAGS += $(patsubst %,-I%,$(EXTRAINCDIRS))
+BASEFLAGS += -ffunction-sections -funit-at-a-time #-mcall-prologues
+BASEFLAGS += -fmerge-all-constants -ffast-math -funsafe-loop-optimizations #Dangerous?
+BASEFLAGS += -lm
+
+CONLYFLAGS = -Wstrict-prototypes -Wimplicit
+CPPONLYFLAGS = -fno-exceptions -fno-default-inline -finline-limit=100 -fno-threadsafe-statics
+ASFLAGS = -Wa,-adhlns=$(<:.S=.lst),-g3
+
+ifeq ($(strip $(DEBUG)),True)
+CPPSRC += $(SYSTEMDIR)/debug.cpp
+endif
+
+CONFIG_FILE ?= config.avrbase.h
+
+
+###################################################################
+PREFIX = avr
+CC = $(PREFIX)-gcc
+CXX = $(PREFIX)-c++
+OBJDUMP = $(PREFIX)-objdump
+OBJCOPY = $(PREFIX)-objcopy
+NM = $(PREFIX)-nm
+ifneq (,$(wildcard /usr/local/bin/getsize.py))
+	SIZE = /usr/local/bin/getsize.py
+	SIZE_PARAM = $(PREFIX)-size
+else
+	SIZE = $(prefix)-size
+	SIZE_PARAM = 
+endif
+
+EXTRAINCDIRS += $(SYSTEMDIR)
+
+COBJ      = $(SRC:.c=.o)
+AOBJ      = $(ASRC:.S=.o)
+CPPOBJ    = $(CPPSRC:.cpp=.o)
+
+# MD = create dependency rules + object file
+# MF = dependency output file
+# MP = create dummy rules for headers so make doesn't complain about removed header files
+BASEFLAGS += -MD -MP -MF .dep/$(@F).d
+BASEFLAGS += -mmcu=$(MCU) -DF_CPU=$(F_CPU) -I.
+CFLAGS = $(BASEFLAGS) $(CONLYFLAGS)
+CXXFLAGS = $(BASEFLAGS) $(CPPONLYFLAGS)
+ASFLAGS += -mcpu=$(MCU) -I. -x assembler-with-cpp
+LDFLAGS = -lc -lgcc -funit-at-a-time -Wl,--gc-sections -Wl,--relax $(CUSTOM_LDFLAGS)
+
+.PHONY: all build prepare sizebefore sizeafter program program_ignore_fuses verify_fuses fuses mmap clean rfprog
+all: prepare sizebefore build sizeafter mmap
+build: debug/main.elf debug/main.lss
+
+prepare:
+	@mkdir -p debug
+
+sizebefore:
+	@if [ -f debug/main.elf ]; then cp debug/main.elf debug/main.old; fi
+
+sizeafter: debug/main.elf
+	@$(SIZE) debug/main.elf $(SIZE_PARAM)
+
+program: all
+	@# These two targets need to run sequential
+	make -j1 verify_fuses 
+	make -j1 program_ignore_fuses
+
+
+program_ignore_fuses: all
+	@echo avrdude -p $(MCU_PROGRAMMER) -c $(PROGRAMMER) $(PROGRAMMER_FLAGS) -U flash:v:debug/main.elf -U lock:v:debug/main.elf -q -q
+	@if ! avrdude -p $(MCU_PROGRAMMER) -c $(PROGRAMMER) $(PROGRAMMER_FLAGS) -U flash:v:debug/main.elf -U lock:v:debug/main.elf -q -q; then \
+		avrdude -p $(MCU_PROGRAMMER) -c $(PROGRAMMER) $(PROGRAMMER_FLAGS) -U flash:w:debug/main.elf -U lock:w:debug/main.elf -y; \
+	else \
+		echo "Already programmed."; \
+	fi
+	
+rfprog: all
+	upload_firmware.py $(UID) debug/main.elf
+
+verify_fuses:
+	@if egrep '(fuses_|lockbits)' $(CONFIG_FILE) | grep '|'  -q; then \
+	    echo "ERROR: Use & instead of | to combine fuses and lockbits."; \
+	    false;\
+	fi
+	$(Q)avrdude -p $(MCU_PROGRAMMER) -c $(PROGRAMMER) $(PROGRAMMER_FLAGS) -U lfuse:v:debug/main.elf -U hfuse:v:debug/main.elf -U efuse:v:debug/main.elf -q -q || (echo "Fuses did not match. Call 'make fuses' to write correct values or use 'make program_ignore_fuses'"; false)
+
+fuses:
+	@echo "Writing fuses. Do you want to continue? (yes/NO)"
+	@read REPLY; if test "x$$REPLY" = "xyes"; then avrdude -p $(MCU_PROGRAMMER) -c $(PROGRAMMER) $(PROGRAMMER_FLAGS) -U lfuse:w:debug/main.elf -U hfuse:w:debug/main.elf -U efuse:w:debug/main.elf ; else echo "Aborting"; fi
+
+.SECONDARY : debug/main.elf
+.PRECIOUS : $(AOBJ) $(COBJ) $(CPPOBJ)
+debug/main.elf:  $(AOBJ) $(COBJ) $(CPPOBJ)
+	@echo "    LD" $@
+	$(Q)$(CXX) $(BASEFLAGS) $(AOBJ) $(COBJ) $(CPPOBJ) --output $@ $(LDFLAGS)
+
+# Create extended listing file from ELF output file.
+%.lss: %.elf
+	$(Q)$(OBJDUMP) -h -S -C $< > $@
+
+%.bin: %.elf
+	@$(OBJCOPY) -O binary $< $@
+
+mmap: debug/main.elf
+	@$(NM) -C -S -r --radix=d --size-sort debug/main.elf > debug/mmap.size
+	@echo "upper: GLOBAL lower: local, B: BSS, D: Ram, T: code" > debug/size_map
+	@cat debug/mmap.size | egrep -i "\ t\ " >> debug/size_map || true
+	@cat debug/mmap.size | egrep -i "\ d\ " >> debug/size_map || true
+	@cat debug/mmap.size | egrep -i "\ b\ " >> debug/size_map || true
+	@rm debug/mmap.size
+	@$(NM) -C -S --radix=d --numeric-sort debug/main.elf > debug/mmap.loc
+	@cat debug/mmap.loc | egrep -i "\ t\ " >  debug/loc_map || true
+	@cat debug/mmap.loc | egrep -i "\ d\ " >> debug/loc_map || true
+	@cat debug/mmap.loc | egrep -i "\ b\ " >> debug/loc_map || true
+	@rm debug/mmap.loc
+
+# Include the dependency files.
+-include $(shell mkdir .dep 2>/dev/null) $(wildcard .dep/*)
+
+clean: sizebefore
+	rm -f debug/main.elf debug/size_map debug/loc_map $(COBJ) $(CPPOBJ) $(AOBJ) $(ASRC:.S=.lst) $(SRC:.c=.lst) $(CPPSRC:.cpp=.lst) .dep/* *~
