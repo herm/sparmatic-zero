@@ -1,5 +1,21 @@
 #ifndef CONFIG_H_
 #define CONFIG_H_
+#include <avr/signature.h>
+#include <avr/lock.h>
+/*************************************************************************
+ **************************** Fuses **************************************
+ *************************************************************************/
+// Brown out detector: 1.8V
+#define fuses_ext (FUSE_BODLEVEL0)
+// SPI enabled
+// Keep EEPROM contents
+// Bootloader: 1kB, disabled atm
+#define fuses_high (FUSE_SPIEN & FUSE_EESAVE & FUSE_BOOTSZ1)
+// Internal 8 MHz RC oscillator divided by 8
+// Startup time: 14 clock + 65ms (default)
+#define fuses_low (FUSE_CKDIV8 & FUSE_SUT1 & FUSE_CKSEL3 & FUSE_CKSEL2 & FUSE_CKSEL0)
+// No access restrictions
+#define lockbits 0xff
 
 /*************************************************************************
  **************************** Debug **************************************
