@@ -217,3 +217,8 @@ void motorSetPosition(int16_t position)
         debugNumber(motor_position);
     }
 }
+
+int16_t motorGetPosition(void)
+{
+    return motor_position;
+}

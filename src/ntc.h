@@ -6,6 +6,6 @@ void updateNtcTemperature(void);
 
 extern int16_t Temperature;
 extern int8_t NTCOffset;
-#define getNtcTemperature(x) ((const int16_t)Temperature)
+#define getNtcTemperature(x) ((int16_t)Temperature)
 
 #endif /* NTC_H_ */

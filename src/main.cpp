@@ -78,6 +78,7 @@ int main(void)
     encoderInit();
     ntcInit();
     spiInit();
+    Radio::init();
     sei();
     debugString("Init done\r\n");
     while (!motorIsAdapted()) {
@@ -86,8 +87,9 @@ int main(void)
     while (1) {
         updateNtcTemperature();
         updateBattery();
+        Radio::periodic();
         menu();
-
-        sysSleep();
+        _delay_ms(1000);
+//        sysSleep();
     }
 }

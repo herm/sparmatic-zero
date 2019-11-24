@@ -1,3 +1,5 @@
 NRF24L01_RADIO_DIR := $(dir $(lastword $(MAKEFILE_LIST)))
 EXTRAINCDIRS += $(NRF24L01_RADIO_DIR)
+CPPSRC += $(NRF24L01_RADIO_DIR)radio.cpp
 include $(NRF24L01_RADIO_DIR)driver/Makefile.module
+include $(NRF24L01_RADIO_DIR)sensor/Makefile.module

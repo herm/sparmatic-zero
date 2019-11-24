@@ -76,10 +76,7 @@ void sysShutdown(void)
     // other settings should be saved when edited
 }
 
-
-/* TODO: This returns completely wrong values. The calculation seems to be OK, but the ADC values are not.
- * Using the bandgap voltage as a reference is was measured at 1.099V at the Vref pin. */
-void updateBattery(void)
+uint16_t updateBattery(void)
 {
     uint16_t adc = getAdc(ADC_CH_REF);
     /* Uin = scale/fullscale * Uref
@@ -88,4 +85,5 @@ void updateBattery(void)
      * calculate at 32 bit
      */
     BatteryMV = (ADC_REF_MV * 1024UL / adc);
+    return BatteryMV;
 }

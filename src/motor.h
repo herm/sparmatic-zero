@@ -10,5 +10,6 @@ uint8_t motorTimer(void);
 void motorAdapt(void);
 uint8_t motorIsAdapted(void);
 void motorSetPosition(int16_t position);
+int16_t motorGetPosition(void);
 
 #endif /* MOTOR_H_ */

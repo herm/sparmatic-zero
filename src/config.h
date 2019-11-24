@@ -103,6 +103,8 @@
 #define SPI_PIN_MISO PB3
 #define SPI_DDR DDRB
 
+/* How often should we try to communicate with the NRF module before giving up? */
+#define NRF24L01_MAX_RETRIES 10
 #define NRF24L01_DEFAULT_ENABLED_PIPES 0b10
 #define NRF24L01_DEFAULT_CHANNEL 73
 #define TINY_UDP_ENABLED
