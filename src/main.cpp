@@ -13,6 +13,7 @@
 #include "encoder.h"
 #include "power.h"
 #include "spi.h"
+#include "radio.h"
 
 #include <avr/io.h>
 #include <avr/interrupt.h>

@@ -11,11 +11,15 @@ static inline void spiInit(void)
     SPSR = (1 << SPI2X);
 }
 
-static inline uint8_t spiWrite(uint8_t data)
+namespace SPI {
+
+static inline uint8_t write(uint8_t data)
 {
     SPDR = data;
     while (!(SPSR & _BV(SPIF)));
     return SPDR;
+}
+
 }
 
 #endif /* SPI_H_ */

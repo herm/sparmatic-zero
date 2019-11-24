@@ -21,5 +21,5 @@ CUSTOM_LDFLAGS =
 ###################################################################
 SYSTEMDIR = .
 NO_DEFAULT_FILES = True
-#include 
+include nrf24l01/Makefile.module
 include Makefile.avr

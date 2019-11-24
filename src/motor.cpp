@@ -34,7 +34,6 @@
 #define DIR_CLOSE -1
 #define DIR_DISABLED 0
 
-#define force_inline inline __attribute__((always_inline))
 volatile int8_t motor_direction;
 volatile uint8_t motor_timeout;
 volatile uint16_t motor_runtime;

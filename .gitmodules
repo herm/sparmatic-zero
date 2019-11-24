@@ -1,0 +1,3 @@
+[submodule "src/nrf24l01/driver"]
+	path = src/nrf24l01/driver
+	url = /home/r2d2/Projects/lib/nrf24l01

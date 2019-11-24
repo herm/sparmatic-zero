@@ -1,7 +1,7 @@
 #ifndef CONFIG_H_
 #define CONFIG_H_
-#include <avr/signature.h>
-#include <avr/lock.h>
+#define force_inline inline __attribute__((always_inline))
+
 /*************************************************************************
  **************************** Fuses **************************************
  *************************************************************************/
@@ -92,17 +92,8 @@
 /*************************************************************************
  ****************************** Radio ************************************
  *************************************************************************/
-/* nRF24L01+ Mini module pinout:
- * Pin numbering starts at the side closer to the white dot on the PCB
- * 1: +3V3
- * 2: GND
- * 3: CE
- * 4: CSN
- * 5: SCK
- * 6: MOSI
- * 7: MISO
- * 8: IRQ
- */
+// see radio/nrf24l01/driver/README for pinout
+#define NRF24L01_STATIC
 #define NRF24L01_PORT_CE PORTF
 #define NRF24L01_PIN_CE PF7
 #define NRF24L01_PORT_CSN PORTF
@@ -111,5 +102,11 @@
 #define SPI_PIN_MOSI PB2
 #define SPI_PIN_MISO PB3
 #define SPI_DDR DDRB
+
+#define NRF24L01_DEFAULT_ENABLED_PIPES 0b10
+#define NRF24L01_DEFAULT_CHANNEL 73
+#define TINY_UDP_ENABLED
+#define TINY_UDP_DEFAULT_IP 23
+#define TINY_UDP_DEFAULT_MAC " R2D2"
 
 #endif
