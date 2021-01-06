@@ -207,6 +207,8 @@ uint8_t motorIsAdapted(void)
 
 void motorSetPosition(int16_t position)
 {
+    if (position < 0) position = 0;
+    if (position > motor_position_max) position = motor_position_max;
     if (position > motor_position) {
         motorOpen();
     } else if (position < motor_position) {
